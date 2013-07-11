@@ -135,6 +135,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
   {
     $def1 = $this->dsnMap['Local'];
     $def2 = $this->dsnMap['Local2'];
+    $this->object->addProvider($def2['dsn'],$def2['options']);
     $this->object->removeProvider($def2['dsn'],$def2['options']);
 
     $file = $this->object->createFile($this->uri);

@@ -27,6 +27,7 @@ class Storage {
    * @param array $options 保存先接続オプション情報
    */
   public function __construct($dsn,$options=array(),$autoCommit=true){
+    $this->dsn_map = array();
     $this->auto_commit = $autoCommit;
     $this->addProvider($dsn,$options);
   }
@@ -48,9 +49,6 @@ class Storage {
    * @param array $options 保存先接続オプション情報
    */
   public function addProvider($dsn,$options=array()){
-    if(!is_array($this->dsn_map)){
-      $this->dsn_map = array();
-    }
     $this->dsn_map[$dsn] = $options;
   }
   /**
