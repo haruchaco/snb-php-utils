@@ -63,7 +63,7 @@ class File {
     $this->tmp  = tempnam(sys_get_temp_dir(),'snb_tmp_');
     $this->privious = tempnam(sys_get_temp_dir(),'snb_priv_');
     // ファイルがDNSのいずれかに存在するなら取得して一時ファイルにコピー
-    $this->storage->get($uri,$this->tmp);
+    $this->storage->get($this->uri,$this->tmp);
     // rollbackのためにオープン時の状態をもう一つ保存
     if(file_exists($this->tmp) && filesize($this->tmp)>0){
       copy($this->tmp,$this->privious);

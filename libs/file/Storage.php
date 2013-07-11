@@ -75,7 +75,7 @@ class Storage {
         $provider->put($path,$this->uri);
       } catch(Exception $e){
         $this->remove($uri);
-        throw new Exception('Commit failed! '.$dns,0,$e);
+        throw new Exception('Commit failed! '.$dsn,0,$e);
       }
     }
   }
@@ -91,11 +91,11 @@ class Storage {
         $provider = Provider::getInstance($dsn,$options);
         return $provider->get($uri,$path);
       } catch(Exception $e){
-        $exeptions[] = $e;
+        $exceptions[] = $e;
       }
     }
     if(count($exceptions)>0){
-      throw new Exception('Fail to get file! '.$uri.$dns,0,null,$exceptions);
+      throw new Exception('Fail to get file! '.$uri,0,null,$exceptions);
     }
   }
   /**
@@ -103,14 +103,15 @@ class Storage {
    * @param string $uri リモートURI
    */
   public function remove($uri){
-    $exceptions = array();
+    $messages = '';
     foreach($this->dsn_map as $dsn => $options){
       try{
         $provider = Provider::getInstance($dsn,$options);
         $provider->remove($uri);
       } catch(Exception $e){
-        $exeptions[] = $e;
+        $messages .= ':'.$e->getCode().' '.$e->getMessage();
       }
+      trigger_error('Fail to remove. '.$messages,E_USER_NOTICE);
     }
   }
   /**
