@@ -40,7 +40,7 @@ require_once dirname(dirname(__FILE__)).'/Exception.php';
  * - contentType ... content-type
  *
  *
- * @package file\providers
+ * @package snb\file\providers
  * @autthe Masanori Nakashima
  */
 class AmazonS3 extends \snb\file\Provider {

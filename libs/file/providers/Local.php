@@ -24,7 +24,7 @@ require_once dirname(dirname(__FILE__)).'/Exception.php';
  * $file->close();
  * $file->commit();
  *
- * @package file\providers
+ * @package snb\file\providers
  * @autthe Masanori Nakashima
  */
 class Local extends \snb\file\Provider {
