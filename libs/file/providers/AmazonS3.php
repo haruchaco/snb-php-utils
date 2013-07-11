@@ -133,7 +133,7 @@ class AmazonS3 extends \snb\file\Provider {
     $options = array_merge($this->options,$options);
 		$this->remove($dstUri);
 		$response = $this->s3->create_object(
-      $this->bucket,
+      $this->bucket_name,
       $dstUri,
       array(
 			  'fileUpload' => $srcPath,
@@ -159,7 +159,7 @@ class AmazonS3 extends \snb\file\Provider {
 			$dstUri = substr($dstUri,1);
 		}
 		$response = $this->s3->delete_objects(
-      $this->bucket,
+      $this->bucket_name,
       array(  
 			  'objects' => array(array('key' => $dstUri)))
     );
