@@ -62,21 +62,10 @@ class LocalTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\providers\Local::connect
-   * @covers snb\file\providers\Local::__construct
-   */
-  public function testConnect()
-  {
-    $this->object = new Local;
-    // valid
-    $this->connect();
-  }
-  /**
-   * @covers snb\file\providers\Local::connect
+   * @expectedException snb\file\Exception
    */
   public function testConnectInvalid1()
   {
-    // Exceptions
-    $this->setExpectedException('snb\file\Exception');
     // invalid name
     $dsn = 'invalidname://'.DIR_TEST;
     $options = array('permission' => 0644);
@@ -84,11 +73,10 @@ class LocalTest extends \PHPUnit_Framework_TestCase
   }
   /**
    * @covers snb\file\providers\Local::connect
+   * @expectedException snb\file\Exception
    */
   public function testConnectInvalid2()
   {
-    // Exceptions
-    $this->setExpectedException('snb\file\Exception');
     // no path
     $dsn = 'local://';
     $options = array('permission' => 0644);
@@ -96,15 +84,26 @@ class LocalTest extends \PHPUnit_Framework_TestCase
   }
   /**
    * @covers snb\file\providers\Local::connect
+   * @expectedException snb\file\Exception
    */
   public function testConnectInvalid3()
   {
-    // Exceptions
-    $this->setExpectedException('snb\file\Exception');
     // no path dir
     $dsn = 'local:///foo/foo/foo';
     $options = array('permission' => 0644);
     $this->object->connect($dsn,$options);
+  }
+
+  /**
+   * @covers snb\file\providers\Local::connect
+   * @covers snb\file\providers\Local::__construct
+   */
+  public function testConnect()
+  {
+    $this->object = new Local;
+    // valid
+    $options = array('permission' => 0644);
+    $this->object->connect($this->dsn,$options);
   }
 
   /**
@@ -126,6 +125,7 @@ class LocalTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\providers\Local::get
+   * @covers snb\file\providers\Local::getRealPath
    */
   public function testGet()
   {
@@ -148,6 +148,7 @@ class LocalTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\providers\Local::put
+   * @covers snb\file\providers\Local::getRealPath
    */
   public function testPut()
   {
@@ -174,6 +175,7 @@ class LocalTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\providers\Local::remove
+   * @covers snb\file\providers\Local::getRealPath
    */
   public function testRemove()
   {

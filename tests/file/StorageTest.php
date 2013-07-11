@@ -66,12 +66,21 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals($expected,$result);
   }
 
+  /**
+   * assertion the file is deleted
+   */
   protected function assertLocalDeleted($dsn,$uri){
     $dir = str_replace('local://','',$dsn);
     $path = $dir."/".$uri;
     $this->assertFalse(file_exists($path));
   }
 
+  /**
+   * file write
+   * @covers snb\file\File::open
+   * @covers snb\file\File::write
+   * @covers snb\file\File::close
+   */
   protected function fileWrite($file,$strings){
     $file->open('w');
     $file->write($strings);
@@ -82,6 +91,10 @@ class StorageTest extends \PHPUnit_Framework_TestCase
   /**
    * @covers snb\file\Storage::createFile
    * @covers snb\file\Storage::__construct
+   * @covers snb\file\File::__construct
+   * @covers snb\file\File::open
+   * @covers snb\file\File::write
+   * @covers snb\file\File::close
    */
   public function testCreateFile()
   {
@@ -105,6 +118,10 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\Storage::addProvider
+   * @covers snb\file\File::__construct
+   * @covers snb\file\File::open
+   * @covers snb\file\File::write
+   * @covers snb\file\File::close
    */
   public function testAddProvider()
   {
@@ -131,6 +148,10 @@ class StorageTest extends \PHPUnit_Framework_TestCase
   /**
    * @covers snb\file\Storage::removeProvider
    * @covers snb\file\Storage::addProvider
+   * @covers snb\file\File::__construct
+   * @covers snb\file\File::open
+   * @covers snb\file\File::write
+   * @covers snb\file\File::close
    * @depends testAddProvider
    */
   public function testRemoveProvider()
