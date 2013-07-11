@@ -5,7 +5,7 @@ require_once(dirname(__FILE__).'/Exception.php');
 /**
  * ファイルを扱うユーティリティクラス
  * 
- * @package snb\util
+ * @package snb\file
  */
 class File {
   /**

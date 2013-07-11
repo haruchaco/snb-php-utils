@@ -6,7 +6,7 @@ require_once(dirname(__FILE__).'/Provider.php');
 /**
  * ファイルを扱うユーティリティクラス
  * 
- * @package snb\util
+ * @package snb\file
  */
 class Storage {
   /**

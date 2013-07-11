@@ -3,6 +3,8 @@ namespace snb\file;
 /**
  * ユーティリティパッケージ用の基底例外クラス
  * 不要かもしれない
+ * 
+ * @package snb\file
  */
 class Exception extends \Exception {
   /**
