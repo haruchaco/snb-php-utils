@@ -132,6 +132,7 @@ class AmazonS3 extends \snb\file\Provider {
     $dstUri = $this->_formatUri($dstUri);
 		$this->remove($dstUri);
     $options = $this->_mergePutOptions($options);
+    $options['fileUpload'] = $srcPath; 
 		$response = $this->s3->create_object(
       $this->bucket_name,
       $dstUri,
@@ -173,7 +174,7 @@ class AmazonS3 extends \snb\file\Provider {
     if(isset($options['acl'])){
       $mergedOpts['acl'] = $options['acl'];
     } else if(!isset($options['acl']) || strlen($options['acl'])==0){
-      $mergedOpts['acl'] = AmazonS3::ACL_PUBLIC;
+      $mergedOpts['acl'] = \AmazonS3::ACL_PUBLIC;
     }
     if(isset($options['contentType'])){
       $mergedOpts['contentType'] = $options['contentType'];
