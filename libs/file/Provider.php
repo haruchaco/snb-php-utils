@@ -66,14 +66,14 @@ abstract class Provider {
 	/**
 	 * put file
 	 * @param string $srcPath
-	 * @param string $distUri
+	 * @param string $dstUri
    * @param array $options
 	 */
-	abstract public function put($srcPath,$distUri,$options=array());
+	abstract public function put($srcPath,$dstUri,$options=array());
 	/**
 	 * remove file or folder
-	 * @param string $distUri
+	 * @param string $dstUri
 	 * @param boolean $recursive
 	 */
-	abstract public function remove($distUri,$recursive=false);
+	abstract public function remove($dstUri,$recursive=false);
 }

@@ -88,11 +88,11 @@ class Local extends \snb\file\Provider {
 	/**
 	 * put file
 	 * @param string $srcPath
-	 * @param string $distUri
+	 * @param string $dstUri
    * @param array $options
 	 */
-	public function put($srcPath,$distUri,$options=array()){
-    $filePath = $this->getRealPath($distUri);
+	public function put($srcPath,$dstUri,$options=array()){
+    $filePath = $this->getRealPath($dstUri);
     if(@copy($srcPath,$filePath)){
       $options = array_merge($this->options,$options);
       if(isset($options['permission'])){
@@ -105,11 +105,11 @@ class Local extends \snb\file\Provider {
   }
 	/**
 	 * remove file or folder
-	 * @param string $distUri
+	 * @param string $dstUri
 	 * @param boolean $recursive
 	 */
-	public function remove($distUri,$recursive=false){
-    $filePath = $this->getRealPath($distUri);
+	public function remove($dstUri,$recursive=false){
+    $filePath = $this->getRealPath($dstUri);
     if(file_exists($filePath)){
       if(is_dir($filePath)){
       } else {
