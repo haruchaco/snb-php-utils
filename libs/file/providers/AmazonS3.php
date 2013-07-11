@@ -130,20 +130,12 @@ class AmazonS3 extends \snb\file\Provider {
 	 */
 	public function put($srcPath,$dstUri,$options=array()){
     $dstUri = $this->_formatUri($dstUri);
-    $options = array_merge($this->options,$options);
 		$this->remove($dstUri);
-    $acl = isset($options['acl']) ? $options['acl'] : AmazonS3::ACL_PUBLIC;
-    $contentType = isset($options['contentType']) ? $options['contentType'] : 'text/plaing';
-    $curlopts = isset($options['curlopts']) ? $options['curlopts'] : array(CURLOPT_SSL_VERIFYPEER => false);
+    $options = $this->_mergePutOptions($options);
 		$response = $this->s3->create_object(
       $this->bucket_name,
       $dstUri,
-      array(
-			  'fileUpload' => $srcPath,
-        'acl' => $acl,
-        'contentType' => $contentType,
-        'curlopts' => $curlopts,
-		  )
+      $options
     );
 		if ($response->isOK()) {
       return true;
@@ -170,6 +162,31 @@ class AmazonS3 extends \snb\file\Provider {
       return false;
     }
 		return true;
+  }
+  /**
+   * merge options for put.
+   * @param array $options
+   * @return array
+   */
+  private function _mergePutOptions($options){
+    $mergedOpts = array_merge($this->options,$options);
+    if(isset($options['acl'])){
+      $mergedOpts['acl'] = $options['acl'];
+    } else if(!isset($options['acl']) || strlen($options['acl'])==0){
+      $mergedOpts['acl'] = AmazonS3::ACL_PUBLIC;
+    }
+    if(isset($options['contentType'])){
+      $mergedOpts['contentType'] = $options['contentType'];
+    } else if(!isset($options['contentType']) || strlen($options['contentType'])==0){
+      $mergedOpts['contentType'] = 'text/plain';
+    }
+    if(isset($options['curlopts'])){
+      $mergedOpts['curlopts'] = $options['curlopts'];
+    } else if(!isset($options['curlopts']) ||
+      !is_array($options['curlopts']) || count($options['curlopts'])==0){
+      $mergedOpts['curlopts'] = array(CURLOPT_SSL_VERIFYPEER => false);
+    }
+    return $mergedOpts;
   }
   /**
    * format uri for S3
