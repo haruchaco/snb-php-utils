@@ -62,6 +62,7 @@ class LocalTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\providers\Local::connect
+   * @covers snb\file\providers\Local::__construct
    */
   public function testConnect()
   {
@@ -72,7 +73,7 @@ class LocalTest extends \PHPUnit_Framework_TestCase
   /**
    * @covers snb\file\providers\Local::connect
    */
-  public function testConnectInvalidName1()
+  public function testConnectInvalid1()
   {
     // Exceptions
     $this->setExpectedException('snb\file\Exception');
@@ -84,7 +85,7 @@ class LocalTest extends \PHPUnit_Framework_TestCase
   /**
    * @covers snb\file\providers\Local::connect
    */
-  public function testConnectInvalidName2()
+  public function testConnectInvalid2()
   {
     // Exceptions
     $this->setExpectedException('snb\file\Exception');
@@ -96,7 +97,7 @@ class LocalTest extends \PHPUnit_Framework_TestCase
   /**
    * @covers snb\file\providers\Local::connect
    */
-  public function testConnectInvalidName3()
+  public function testConnectInvalid3()
   {
     // Exceptions
     $this->setExpectedException('snb\file\Exception');
@@ -104,6 +105,23 @@ class LocalTest extends \PHPUnit_Framework_TestCase
     $dsn = 'local:///foo/foo/foo';
     $options = array('permission' => 0644);
     $this->object->connect($dsn,$options);
+  }
+
+  /**
+   * @covers snb\file\providers\Local::connect
+   * @covers snb\file\providers\Local::disxonnect
+   */
+  public function testDisconnect()
+  {
+    $this->object = new Local;
+    $expected = new Local;
+    // valid
+    $this->connect();
+    $this->assertNotEquals($expected,$this->object);
+    $this->object->disconnect();
+    $this->assertEquals($expected,$this->object);
+    // reconnect
+    $this->connect();
   }
 
   /**

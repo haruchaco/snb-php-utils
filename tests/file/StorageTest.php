@@ -81,6 +81,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\Storage::createFile
+   * @covers snb\file\Storage::__construct
    */
   public function testCreateFile()
   {
@@ -129,6 +130,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\Storage::removeProvider
+   * @covers snb\file\Storage::addProvider
    * @depends testAddProvider
    */
   public function testRemoveProvider()
@@ -173,6 +175,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\Storage::get
+   * @covers snb\file\Storage::put
    * @depends testPut
    */
   public function testGet()
@@ -190,6 +193,8 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\Storage::remove
+   * @covers snb\file\Storage::get
+   * @covers snb\file\Storage::put
    * @depends testGet
    */
   public function testRemove()
