@@ -103,7 +103,9 @@ class AmazonS3 extends \snb\file\Provider {
    * get contents from uri
    */
   public function get($uri,$path=null){
-    $localPath = (!is_null($path) ) ? $path :tempnam(sys_get_temp_dir(),'sbn_aws_s3_tmp_');
+    $uri = $this->_formatUri($uri);
+    $localPath = (!is_null($path) ) ?
+      $path :tempnam(sys_get_temp_dir(),'sbn_aws_s3_tmp_');
 		$response = $this->s3->get_object(
       $this->bucket_name,
       $uri,
@@ -127,19 +129,20 @@ class AmazonS3 extends \snb\file\Provider {
    * @param array $options
 	 */
 	public function put($srcPath,$dstUri,$options=array()){
-		if( strpos($dstUri,'/')===0 ){
-			$dstUri = substr($dstUri,1);
-		}
+    $dstUri = $this->_formatUri($dstUri);
     $options = array_merge($this->options,$options);
 		$this->remove($dstUri);
+    $acl = isset($options['acl']) ? $options['acl'] : AmazonS3::ACL_PUBLIC;
+    $contentType = isset($options['contentType']) ? $options['contentType'] : 'text/plaing';
+    $curlopts = isset($options['curlopts']) ? $options['curlopts'] : array(CURLOPT_SSL_VERIFYPEER => false);
 		$response = $this->s3->create_object(
       $this->bucket_name,
       $dstUri,
       array(
 			  'fileUpload' => $srcPath,
-        'acl' => isset($options['acl']) ? $options['acl'] : AmazonS3::ACL_PUBLIC,
-        'contentType' => isset($options['contentType']) ? $options['contentType'] : 'text/plaing',
-        'curlopts' => isset($options['curlopts']) ? $options['curlopts'] : array(CURLOPT_SSL_VERIFYPEER => false),
+        'acl' => $acl,
+        'contentType' => $contentType,
+        'curlopts' => $curlopts,
 		  )
     );
 		if ($response->isOK()) {
@@ -155,14 +158,26 @@ class AmazonS3 extends \snb\file\Provider {
 	 * @param boolean $recursive
 	 */
 	public function remove($dstUri,$recursive=false){
-		if( strpos($dstUri,'/')===0 ){
-			$dstUri = substr($dstUri,1);
-		}
+    $dstUri = $this->_formatUri($dstUri);
 		$response = $this->s3->delete_objects(
       $this->bucket_name,
       array(  
 			  'objects' => array(array('key' => $dstUri)))
     );
+		if ($response->isOK()) {
+      return true;
+    } else {
+      return false;
+    }
 		return true;
+  }
+  /**
+   * format uri for S3
+   */
+  private function _formatUri($uri){
+		if( strpos($uri,'/')===0 ){
+			$uri = substr($uri,1);
+		}
+    return $uri;
   }
 }
