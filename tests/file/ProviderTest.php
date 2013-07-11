@@ -59,12 +59,12 @@ class ProviderTest extends \PHPUnit_Framework_TestCase
     // valid
     $this->object = Provider::getInstance($def['dsn'],$def['options']);
     $this->assertEquals('snb\\file\\providers\\Local',get_class($this->object));
-    // invalid
-    $this->setExpectedException('snb\file\Exception');
-    $this->object = Provider::getInstance('',$def['options']);
     // retry
     $this->object = Provider::getInstance($def['dsn'],$def['options']);
     $this->assertEquals('snb\\file\\providers\\Local',get_class($this->object));
+    // invalid
+    $this->setExpectedException('snb\file\Exception');
+    $this->object = Provider::getInstance('',$def['options']);
   }
   /**
    * @covers snb\file\Provider::getProviderName
