@@ -55,11 +55,24 @@ class ProviderTest extends \PHPUnit_Framework_TestCase
    */
   public function testGetInstance()
   {
-    // valid
     $def = $this->dsnMap['Local'];
+    // valid
     $this->object = Provider::getInstance($def['dsn'],$def['options']);
+    $this->assertEquals('snb\\file\\providers\\Local',get_class($this->object));
     // invalid
     $this->setExpectedException('snb\file\Exception');
     $this->object = Provider::getInstance('',$def['options']);
+    // retry
+    $this->object = Provider::getInstance($def['dsn'],$def['options']);
+    $this->assertEquals('snb\\file\\providers\\Local',get_class($this->object));
+  }
+  /**
+   * @covers snb\file\Provider::getProviderName
+   */
+  public function testGetProviderName()
+  {
+    $def = $this->dsnMap['Local'];
+    $result = Provider::getProviderName($def['dsn']);
+    $this->assertEquals('Local',$result);
   }
 }

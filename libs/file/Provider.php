@@ -44,7 +44,7 @@ abstract class Provider {
    * @param string $dsn
    * @return string driver name
    */
-  private static function getProviderName($dsn){
+  public static function getProviderName($dsn){
     list($name) = explode('://',$dsn);
     $name = ucwords($name);
     $name = str_replace('_','',$name);
