@@ -9,7 +9,9 @@ class StorageTest extends \PHPUnit_Framework_TestCase
   /**
    * @var Storage
    */
-  public $object;
+  private $object;
+
+  private $dsnMap = array();
 
   /**
    * Sets up the fixture, for example, opens a network connection.
@@ -17,7 +19,11 @@ class StorageTest extends \PHPUnit_Framework_TestCase
    */
   public function setUp()
   {
-    $this->object = new Storage('local:///Users/masanori_nakashima/work/snb-php-utils/tests');
+    $this->dsnMap = array(
+      'local:///Users/masanori/work/snb-php-utils/tests/work' => array('permission'=>0644),
+    );
+    $defaultDsn = array_shift(array_keys($this->dsnMap));
+    $this->object = new Storage($defaultDsn,$this->dsnMap[$defaultDsn],false);
   }
 
   /**
@@ -30,14 +36,21 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\Storage::createFile
-   * @todo   Implement testCreateFile().
    */
   public function testCreateFile()
   {
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
+    $uri  = 'test.txt';
+    $text = 'This is test!';
+    $file = $this->object->createFile($uri);
+    $this->assertNotNull($file);
+    $this->assertEquals('snb\file\File',get_class($file));
+    $file->open('w');
+    $file->write($text);
+    $file->close();
+    $file->commit();
+    $result = file_get_contents('/Users/masanori/work/snb-php-utils/tests/work/test.txt');
+    $this->assertEquals($text,$result);
+    $this->object->remove($uri);
   }
 
   /**

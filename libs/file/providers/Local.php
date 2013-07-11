@@ -56,7 +56,7 @@ class Local extends \snb\file\Provider {
       throw new \snb\file\Exception('The base path is null!',
         \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
     } else if(!is_dir($path)){
-      throw new \snb\file\Exception('The base path is not directory!',
+      throw new \snb\file\Exception('The base path is not a directory! '.$path,
         \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
     }
     $this->base_path = preg_replace('/\/$/','',$path);

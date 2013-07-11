@@ -28,7 +28,7 @@ abstract class Provider {
     }
     $baseName = self::getProviderName($dsn);
     $file = dirname(__FILE__).'/providers/'.$baseName.'.php';
-    $className = 'snb\\file\\provider\\'.$baseName;
+    $className = 'snb\\file\\providers\\'.$baseName;
     if(file_exists($file)){
       require_once($file);
       $obj = new $className;

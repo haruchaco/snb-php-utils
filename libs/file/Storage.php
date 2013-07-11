@@ -69,10 +69,11 @@ class Storage {
    * @param array $options
    */
   public function put($path,$uri,$options=array()){
-    foreach($this->dsn_map as $dsn => $options){
+    foreach($this->dsn_map as $dsn => $defaultOptions){
+      $options = array_merge($defaultOptions,$options);
       try{
         $provider = Provider::getInstance($dsn,$options);
-        $provider->put($path,$this->uri);
+        $provider->put($path,$uri);
       } catch(Exception $e){
         $this->remove($uri);
         throw new Exception('Commit failed! '.$dsn,0,$e);
@@ -111,6 +112,8 @@ class Storage {
       } catch(Exception $e){
         $messages .= ':'.$e->getCode().' '.$e->getMessage();
       }
+    }
+    if(strlen($messages)>0){
       trigger_error('Fail to remove. '.$messages,E_USER_NOTICE);
     }
   }
