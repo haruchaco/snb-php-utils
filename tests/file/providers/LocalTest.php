@@ -31,12 +31,13 @@ class LocalTest extends \PHPUnit_Framework_TestCase
    */
   protected function setUp()
   {
-    $this->object = new Local;
     $this->uri_example  = 'example.txt';
     $this->path_example = DIR_TEST.'/fixtures/example.txt';
     $this->dsn = 'local://'.DIR_TEST.'/work';
     // workフォルダにコピー
     @copy($this->path_example,DIR_TEST.'/work/'.$this->uri_example);
+    // new
+    $this->object = new Local;
   }
 
   /**
@@ -64,18 +65,41 @@ class LocalTest extends \PHPUnit_Framework_TestCase
    */
   public function testConnect()
   {
+    $this->object = new Local;
     // valid
     $this->connect();
+  }
+  /**
+   * @covers snb\file\providers\Local::connect
+   */
+  public function testConnectInvalidName1()
+  {
     // Exceptions
     $this->setExpectedException('snb\file\Exception');
     // invalid name
     $dsn = 'invalidname://'.DIR_TEST;
     $options = array('permission' => 0644);
     $this->object->connect($dsn,$options);
+  }
+  /**
+   * @covers snb\file\providers\Local::connect
+   */
+  public function testConnectInvalidName2()
+  {
+    // Exceptions
+    $this->setExpectedException('snb\file\Exception');
     // no path
     $dsn = 'local://';
     $options = array('permission' => 0644);
     $this->object->connect($dsn,$options);
+  }
+  /**
+   * @covers snb\file\providers\Local::connect
+   */
+  public function testConnectInvalidName3()
+  {
+    // Exceptions
+    $this->setExpectedException('snb\file\Exception');
     // no path dir
     $dsn = 'local:///foo/foo/foo';
     $options = array('permission' => 0644);
