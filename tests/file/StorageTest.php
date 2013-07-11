@@ -10,8 +10,14 @@ class StorageTest extends \PHPUnit_Framework_TestCase
    * @var Storage
    */
   private $object;
-
+  /**
+   * dsn map
+   */
   private $dsnMap = array();
+  /**
+   * test file uri
+   */
+  private $uri = 'test.txt';
 
   /**
    * Sets up the fixture, for example, opens a network connection.
@@ -20,10 +26,26 @@ class StorageTest extends \PHPUnit_Framework_TestCase
   public function setUp()
   {
     $this->dsnMap = array(
-      'local:///Users/masanori/work/snb-php-utils/tests/work' => array('permission'=>0644),
+      'Local' => array(
+        'dsn' => 'local:///Users/masanori/work/snb-php-utils/tests/work',
+        'options' => array('permission'=>0644),
+      ),
+      'Local2' => array(
+        'dsn' => 'local:///Users/masanori/work/snb-php-utils/tests/tmp',
+        'options' => array('permission'=>0644),
+      ),
+      'AmazonS3' => array(
+        'dsn' => 'amazon_s3://REGION_'.$_SERVER['SNB_AWS_S3_REGION_NAME'].'/'.$_SERVER['SNB_AWS_S3_BUCKET'],
+        'options' => array(
+          'key' => $_SERVER['SNB_AWS_KEY'],
+          'secret' => $_SERVER['SNB_AWS_SECRET'],
+          'default_cache_config' => '',
+          'certificate_autority' => false
+        )
+      )
     );
-    $defaultDsn = array_shift(array_keys($this->dsnMap));
-    $this->object = new Storage($defaultDsn,$this->dsnMap[$defaultDsn],false);
+    $def = $this->dsnMap['Local'];
+    $this->object = new Storage($def['dsn'],$def['options'],false);
   }
 
   /**
@@ -35,106 +57,184 @@ class StorageTest extends \PHPUnit_Framework_TestCase
   }
 
   /**
+   * assert local providers writing
+   */
+  protected function assertLocalWritten($dsn,$expected,$uri){
+    $dir = str_replace('local://','',$dsn);
+    $path = $dir."/".$uri;
+    $result = file_get_contents($path);
+    $this->assertEquals($expected,$result);
+  }
+
+  protected function assertLocalDeleted($dsn,$uri){
+    $dir = str_replace('local://','',$dsn);
+    $path = $dir."/".$uri;
+    $this->assertFalse(file_exists($path));
+  }
+
+  protected function fileWrite($file,$strings){
+    $file->open('w');
+    $file->write($strings);
+    $file->close();
+    $file->commit();
+  }
+
+  /**
    * @covers snb\file\Storage::createFile
    */
   public function testCreateFile()
   {
-    $uri  = 'test.txt';
-    $text = 'This is test!';
-    $file = $this->object->createFile($uri);
+    // renew storage
+    $def = $this->dsnMap['Local'];
+    $this->object = new Storage($def['dsn'],$def['options'],false);
+
+    // create file
+    $file = $this->object->createFile($this->uri);
     $this->assertNotNull($file);
     $this->assertEquals('snb\file\File',get_class($file));
-    $file->open('w');
-    $file->write($text);
-    $file->close();
-    $file->commit();
-    $result = file_get_contents('/Users/masanori/work/snb-php-utils/tests/work/test.txt');
-    $this->assertEquals($text,$result);
-    $this->object->remove($uri);
+
+    // test writing
+    $expected = 'This is test!';
+    $this->fileWrite($file,$expected);
+    $this->assertLocalWritten($def['dsn'],$expected,$this->uri);
+
+    // remove file
+    $this->object->remove($this->uri);
   }
 
   /**
    * @covers snb\file\Storage::addProvider
-   * @todo   Implement testAddProvider().
    */
   public function testAddProvider()
   {
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
+    $def1 = $this->dsnMap['Local'];
+    $def2 = $this->dsnMap['Local2'];
+    $this->object->addProvider($def2['dsn'],$def2['options']);
+
+    $file = $this->object->createFile($this->uri);
+
+    $expected = 'This is test 2 providers!';
+    $this->fileWrite($file,$expected);
+
+    $this->assertLocalWritten($def1['dsn'],$expected,$this->uri);
+    $this->assertLocalWritten($def2['dsn'],$expected,$this->uri);
+
+    // remove file
+    $this->object->remove($this->uri);
+
+    // assertLocalDeleted
+    $this->assertLocalDeleted($def1['dsn'],$this->uri);
+    $this->assertLocalDeleted($def2['dsn'],$this->uri);
   }
 
   /**
    * @covers snb\file\Storage::removeProvider
-   * @todo   Implement testRemoveProvider().
+   * @depends testAddProvider
    */
   public function testRemoveProvider()
   {
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
+    $def1 = $this->dsnMap['Local'];
+    $def2 = $this->dsnMap['Local2'];
+    $this->object->removeProvider($def2['dsn'],$def2['options']);
+
+    $file = $this->object->createFile($this->uri);
+
+    $expected = 'This is test to remove provider!';
+    $this->fileWrite($file,$expected);
+
+    $this->assertLocalWritten($def1['dsn'],$expected,$this->uri);
+    $this->assertLocalDeleted($def2['dsn'],$this->uri);
+
+    // remove file
+    $this->object->remove($this->uri);
+    // assertLocalDeleted
+    $this->assertLocalDeleted($def1['dsn'],$this->uri);
   }
 
   /**
    * @covers snb\file\Storage::put
-   * @todo   Implement testPut().
    */
   public function testPut()
   {
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
+    $def1 = $this->dsnMap['Local'];
+    $def2 = $this->dsnMap['Local2'];
+    $this->object->addProvider($def2['dsn'],$def2['options']);
+
+    $path = DIR_TEST.'/fixtures/example.txt';
+    $expected = file_get_contents($path);
+
+    $this->object->put($path,$this->uri,array('permittion'=>0644));
+    
+    $this->assertLocalWritten($def1['dsn'],$expected,$this->uri);
+    $this->assertLocalWritten($def2['dsn'],$expected,$this->uri);
+
   }
 
   /**
    * @covers snb\file\Storage::get
-   * @todo   Implement testGet().
+   * @depends testPut
    */
   public function testGet()
   {
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
+    $def1 = $this->dsnMap['Local'];
+    $def2 = $this->dsnMap['Local2'];
+    $this->object->addProvider($def2['dsn'],$def2['options']);
+
+    $path = DIR_TEST.'/fixtures/example.txt';
+    $expected = file_get_contents($path);
+
+    $result = $this->object->get($this->uri);
+    $this->assertEquals($expected,$result);
   }
 
   /**
    * @covers snb\file\Storage::remove
-   * @todo   Implement testRemove().
+   * @depends testGet
    */
   public function testRemove()
   {
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
+    $def1 = $this->dsnMap['Local'];
+    $def2 = $this->dsnMap['Local2'];
+    $this->object->addProvider($def2['dsn'],$def2['options']);
+    // remove file
+    $this->object->remove($this->uri);
+    // assertLocalDeleted
+    $this->assertLocalDeleted($def1['dsn'],$this->uri);
+    $this->assertLocalDeleted($def2['dsn'],$this->uri);
   }
 
   /**
    * @covers snb\file\Storage::putContents
-   * @todo   Implement testPutContents().
    */
   public function testPutContents()
   {
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
+    $def1 = $this->dsnMap['Local'];
+    $def2 = $this->dsnMap['Local2'];
+    $this->object->addProvider($def2['dsn'],$def2['options']);
+
+    $expected = 'This is put contents test';
+
+    $this->object->putContents($this->uri,$expected,array('permission'=>0644));
+    $result = $this->object->get($this->uri);
+    $this->assertEquals($expected,$result);
   }
 
   /**
    * @covers snb\file\Storage::getContents
-   * @todo   Implement testGetContents().
+   * @depends testPutContents
    */
   public function testGetContents()
   {
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
+    $def1 = $this->dsnMap['Local'];
+    $def2 = $this->dsnMap['Local2'];
+    $this->object->addProvider($def2['dsn'],$def2['options']);
+
+    $expected = 'This is put contents test';
+
+    $result = $this->object->getContents($this->uri);
+    $this->assertEquals($expected,$result);
+
+    $this->testRemove();
   }
 
   /**

@@ -125,8 +125,10 @@ class Storage {
    */
   public function putContents($uri,$contents,$options=array()){
     $tmp = tempnam(sys_get_temp_dir(),'snb_tmp_');
-    if(false === file_put_contents($tmp,$contents)){
-      $this->put($uri,$tmp,$options);
+    if(false !== file_put_contents($tmp,$contents)){
+      $this->put($tmp,$uri,$options);
+    } else {
+      throw new Exception('Fail to write local temp file! '.$tmp.' '.$uri,0,null);
     }
   }
   /**
