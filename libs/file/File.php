@@ -1,43 +1,71 @@
 <?php
+/**
+ * snb\file\File.php class file.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the Apache2 License. For more information please see
+ * <http://github.com/haruchaco>
+ */
+
 namespace snb\file;
 require_once(dirname(__FILE__).'/Storage.php');
 require_once(dirname(__FILE__).'/Exception.php');
+
 /**
- * ファイルを扱うユーティリティクラス
+ * File object class for all storages.
+ *
+ * <p>
+ * You can operate the files as local files.<br>
+ * ストレージ内ファイルを扱うオブジェクトクラス
+ * </p>
+ * <p>
+ * This object supports transaction.
+ * このオブジェクトはトランザクション処理をサポートします。
+ * </p>
  * 
- * @package snb\file
+ * @author    Masanori Nakashima <>
+ * @version   $Id$
+ * @package   snb\file
  */
 class File {
   /**
-   * target storage object
+   * target storage object.
+   * @var Storage
    */
   private $storage = null;
   /**
-   * file uri
+   * file uri on all storages
+   * @var string
    */
   private $uri = null;
   /**
-   * file options
+   * file options for uploading
+   * @var array
    */
   private $options = array();
   /**
-   * temporary file path
+   * temporary file path for edit
+   * @var string
    */
   private $tmp = null;
   /**
-   *
+   * original file backup path before edit if exists.
+   * @var string
    */
   private $privious = null;
   /**
    * file handle of the temporary file
+   * @var resource
    */
   private $handle = null;
   /**
-   * file handle open mode
+   * file handle open mode. rwa+-
+   * @var string
    */
   private $mode = 'r';
   /**
    * auto commit
+   * @var boolean
    */
   private $auto_commit = true;
   /**
@@ -149,7 +177,9 @@ class File {
    */
   public function rolback(){
     $this->storage->remove($this->uri,$this->options);
-    if(!is_null($this->privious)){
+    if(is_null($this->privious)){
+      $this->storage->remove($this->uri);
+    } else {
       $this->storage->put($this->privious,$this->uri,$this->options);
     }
     $this->finalize();

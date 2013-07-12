@@ -1,10 +1,22 @@
 <?php
-namespace snb\file;
 /**
- * ユーティリティパッケージ用の基底例外クラス
- * 不要かもしれない
+ * snb\file\Exception.php class file.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the Apache2 License. For more information please see
+ * <http://github.com/haruchaco>
+ */
+
+namespace snb\file;
+
+/**
+ * Original exception class for snb\file.
+ *
+ * snb\fileパッケージ用の例外クラス。
  * 
- * @package snb\file
+ * @author    Masanori Nakashima <>
+ * @version   $Id$
+ * @package   snb\file
  */
 class Exception extends \Exception {
   /**

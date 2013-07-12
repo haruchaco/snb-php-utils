@@ -1,14 +1,24 @@
 <?php
+/**
+ * snb\file\Provider.php abstract class file.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the Apache2 License. For more information please see
+ * <http://github.com/haruchaco>
+ */
+
 namespace snb\file;
+
 /**
  * 抽象ストレージプロバイダークラス
- *
+ * <p>
  * ストレージプロバイダの基底インターフェースを持つ抽象クラス。
  * すべてのストレージプロバイダクラスは本クラスの拡張クラスとして実装する。
- *
+ * <p>
+ * <p>
  * 唯一の実装メソッドgetInstanceでは
  * DSNからストレージプロバイダを判断してプロバイダに接続済みのインスタンスを取得できる。
- *
+ * <p>
  * @package snb\file
  * @auther Masanori Nakashima
  */
