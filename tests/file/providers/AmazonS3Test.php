@@ -88,7 +88,7 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
    */
   public function testConnectFail2(){
     $this->object = new AmazonS3;
-    $dsn = 'failname://';
+    $dsn = 'amazon_s3://';
     $this->object->connect($dsn,$this->options);
   }
 
@@ -120,7 +120,16 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
   {
     $expected = file_get_contents($this->path_example);
     // put a example file
-    $this->object->put($this->path_example,$this->uri,array('contentType'=>'text/plain;charset=UTF8'));
+    $options = array('contentType'=>'text/plain;charset=UTF8');
+    $this->object->put($this->path_example,$this->uri,$options);
+    $result = $this->httpRequest($this->url,null);
+    $this->assertEquals($expected,$result['body']);
+    // put a example file
+    $options = array('contentType'=>'text/plain');
+    $options['contentType'] = null;
+    $options['acl'] = \AmazonS3::ACL_PUBLIC;
+    $options['curlopts'] = array(CURLOPT_SSL_VERIFYPEER => false);
+    $this->object->put($this->path_example,$this->uri,$options);
     $result = $this->httpRequest($this->url,null);
     $this->assertEquals($expected,$result['body']);
   }
@@ -142,6 +151,21 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
     // get as strings
     $result = $this->object->get($this->uri);
     $this->assertEquals($expected,$result);
+    // get as strings
+    $result = $this->object->get('/'.$this->uri);
+    $this->assertEquals($expected,$result);
+  }
+  /**
+   * @covers snb\file\providers\AmazonS3::get
+   * @covers snb\file\providers\AmazonS3::_mergePutOptions
+   * @covers snb\file\providers\AmazonS3::_formatUri
+   * @expectedException snb\file\Exception
+   */
+  public function testGetFail()
+  {
+    // not exists
+    $result = $this->object->get('notexist.txt');
+    $this->assertNull($result);
   }
 
   /**
@@ -157,6 +181,7 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
     $result = $this->httpRequest($this->url,null);
     $this->assertNotEquals('200',$result['code']);
   }
+
   /**
    * request
    */

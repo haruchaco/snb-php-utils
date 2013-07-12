@@ -108,7 +108,7 @@ class LocalTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\providers\Local::connect
-   * @covers snb\file\providers\Local::disxonnect
+   * @covers snb\file\providers\Local::disconnect
    */
   public function testDisconnect()
   {
