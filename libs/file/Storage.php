@@ -1,30 +1,44 @@
 <?php
+/**
+ * snb\file\Storage.php class file.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the Apache2 License. For more information please see
+ * <http://github.com/haruchaco>
+ */
+
 namespace snb\file;
 require_once(dirname(__FILE__).'/Exception.php');
 require_once(dirname(__FILE__).'/File.php');
 require_once(dirname(__FILE__).'/Provider.php');
 /**
- * ファイルを扱うユーティリティクラス
+ * Storage class.
  * 
- * @package snb\file
+ * @author    Masanori Nakashima <>
+ * @version   $Id$
+ * @package   snb\file
  */
 class Storage {
   /**
    * DNS roots
+   * @var array
    */
   private $dsn_map = array();
   /**
    * auto commit
+   * @var boolean
    */
   private $auto_commit = true;
   /**
    * file object instances
+   * @var array
    */
   private $files = array();
   /**
    * Constructor
    * @param string $dsn ファイル保存先ルートディレクトリDNS
    * @param array $options 保存先接続オプション情報
+   * @param boolean $autoCommit
    */
   public function __construct($dsn,$options=array(),$autoCommit=true){
     $this->dsn_map = array();

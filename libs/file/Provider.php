@@ -14,13 +14,14 @@ namespace snb\file;
  * <p>
  * ストレージプロバイダの基底インターフェースを持つ抽象クラス。
  * すべてのストレージプロバイダクラスは本クラスの拡張クラスとして実装する。
- * <p>
+ * </p>
  * <p>
  * 唯一の実装メソッドgetInstanceでは
  * DSNからストレージプロバイダを判断してプロバイダに接続済みのインスタンスを取得できる。
- * <p>
- * @package snb\file
- * @auther Masanori Nakashima
+ * </p>
+ * @author    Masanori Nakashima <>
+ * @version   $Id$
+ * @package   snb\file
  */
 abstract class Provider {
   /**

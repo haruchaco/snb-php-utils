@@ -49,7 +49,6 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
     $this->path_example = DIR_TEST.'/fixtures/example.txt';
     $this->uri = 'example.txt';
     $this->url = 'https://'.$_SERVER['SNB_AWS_S3_REGION_HOST'].'/'.$_SERVER['SNB_AWS_S3_BUCKET'].'/'.$this->uri;
-    $this->object = new AmazonS3;
     // dsn
     $this->dsn = 'amazon_s3://REGION_'.$_SERVER['SNB_AWS_S3_REGION_NAME'].'/'.$_SERVER['SNB_AWS_S3_BUCKET'];
     // set your aws key and secret to your env
@@ -60,6 +59,7 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
       'certificate_autority' => false
     );
     // connect
+    $this->object = new AmazonS3;
     $this->object->connect($this->dsn,$this->options);
   }
 
@@ -74,9 +74,31 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\providers\AmazonS3::connect
+   * @expectedException snb\file\Exception
+   */
+  public function testConnectFail1(){
+    $this->object = new AmazonS3;
+    $dsn = 'failname://REGION_'.$_SERVER['SNB_AWS_S3_REGION_NAME'].'/'.$_SERVER['SNB_AWS_S3_BUCKET'];
+    $this->object->connect($dsn,$this->options);
+  }
+
+  /**
+   * @covers snb\file\providers\AmazonS3::connect
+   * @expectedException snb\file\Exception
+   */
+  public function testConnectFail2(){
+    $this->object = new AmazonS3;
+    $dsn = 'failname://';
+    $this->object->connect($dsn,$this->options);
+  }
+
+  /**
+   * @covers snb\file\providers\AmazonS3::connect
+   * @covers snb\file\providers\AmazonS3::__construct
    */
   public function testConnect()
   {
+    $this->object = new AmazonS3;
     $this->object->connect($this->dsn,$this->options);
   }
 
@@ -90,6 +112,9 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\providers\AmazonS3::put
+   * @covers snb\file\providers\AmazonS3::remove
+   * @covers snb\file\providers\AmazonS3::_mergePutOptions
+   * @covers snb\file\providers\AmazonS3::_formatUri
    */
   public function testPut()
   {
@@ -102,6 +127,8 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\providers\AmazonS3::get
+   * @covers snb\file\providers\AmazonS3::_mergePutOptions
+   * @covers snb\file\providers\AmazonS3::_formatUri
    * @depends testPut
    */
   public function testGet()
@@ -119,6 +146,8 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
 
   /**
    * @covers snb\file\providers\AmazonS3::remove
+   * @covers snb\file\providers\AmazonS3::_mergePutOptions
+   * @covers snb\file\providers\AmazonS3::_formatUri
    * @depends testPut
    */
   public function testRemove()
