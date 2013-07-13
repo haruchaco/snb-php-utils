@@ -34,11 +34,6 @@ class File {
    */
   private $storage = null;
   /**
-   * worker provider object.
-   * @var Provider
-   */
-  private $worker = null;
-  /**
    * file uri on all storages
    * @var string
    */
@@ -57,7 +52,7 @@ class File {
    * original file backup path before edit if exists.
    * @var string
    */
-  private $privious = null;
+  private $previous = null;
   /**
    * file handle of the temporary file
    * @var resource
@@ -86,13 +81,6 @@ class File {
     $this->options = $options;
     $this->auto_commit = $autoCommit;
     $this->initialize();
-  }
-  /**
-   * Set worker provider
-   * @param Provider $worker
-   */
-  public function setWorker(Provider $worker){
-    $this->worker = $worker;
   }
   /**
    * open file
@@ -223,10 +211,10 @@ class File {
    */
   public function rolback(){
     $this->storage->remove($this->uri,$this->options);
-    if(is_null($this->privious)){
+    if(is_null($this->previous)){
       $this->storage->remove($this->uri);
     } else {
-      $this->storage->put($this->privious,$this->uri,$this->options);
+      $this->storage->put($this->previous,$this->uri,$this->options);
     }
     $this->clean();
     $this->initialize();
@@ -238,23 +226,30 @@ class File {
     if(!is_null($this->tmp) && file_exists($this->tmp)){
       @unlink($this->tmp);
     }
-    if(!is_null($this->privious) && file_exists($this->privious)){
-      @unlink($this->privious);
+    if(!is_null($this->previous) && file_exists($this->previous)){
+      @unlink($this->previous);
     }
   }
   /**
    * initialize temporary files
    */
   public function initialize(){
-    // todo workerを利用するように書き換える
     $this->tmp  = tempnam(sys_get_temp_dir(),'snb_tmp_');
-    $this->privious = tempnam(sys_get_temp_dir(),'snb_priv_');
-    $this->storage->get($this->uri,$this->privious);
+    $this->previous = tempnam(sys_get_temp_dir(),'snb_priv_');
+    try{
+      $this->storage->get($this->uri,$this->previous);
+    } catch(Exception $e){
+      // nothing to do
+    }
+    clearstatcache();
     if(file_exists($this->previous) && filesize($this->previous)>0){
-      copy($this->privious,$this->tmp);
+      if(file_exists($this->tmp)){
+        @unlink($this->tmp);
+      }
+      copy($this->previous,$this->tmp);
     } else {
-      @unlink($this->privious);
-      $this->privious = null;
+      @unlink($this->previous);
+      $this->previous = null;
       touch($this->tmp);
     }
   }

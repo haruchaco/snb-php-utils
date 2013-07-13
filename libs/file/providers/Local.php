@@ -105,7 +105,7 @@ class Local extends \snb\file\Provider {
     $options = array_merge($this->options,$options);
     $filePath = $this->getRealPath($dstUri);
     $dirPath  = dirname($filePath);
-    if(!is_dir($dirPath){
+    if(!is_dir($dirPath)){
       mkdir($dirPath,$options['folder_permission'],true);
     }
     if(@copy($srcPath,$filePath)){
