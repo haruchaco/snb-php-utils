@@ -36,7 +36,7 @@ class Storage {
   private $files = array();
   /**
    * Constructor
-   * @param string $dsn ファイル保存先ルートディレクトリDNS
+   * @param string $dsn ファイル保存先DNS
    * @param array $options 保存先接続オプション情報
    * @param boolean $autoCommit
    */
@@ -48,9 +48,10 @@ class Storage {
   /**
    * 指定URIのファイルオブジェクトを取得
    * @param string $uri
+   * @param array $options
    * @param boolean $autoCommint
    */
-  public function createFile($uri,array $options=array(),$autoCommit=false){
+  public function createFile($uri,array $options=array(),$autoCommit=true){
     if(!isset($this->files[$uri])){
       $this->files[$uri] = new File($this,$uri,$options,$autoCommit);
     }
@@ -59,7 +60,7 @@ class Storage {
   }
   /**
    * Add root dns
-   * @param string $dsn ファイル保存先ルートディレクトリDNS
+   * @param string $dsn ファイル保存先DNS
    * @param array $options 保存先接続オプション情報
    */
   public function addProvider($dsn,$options=array()){
@@ -67,7 +68,7 @@ class Storage {
   }
   /**
    * Remove root dns
-   * @param string $dsn ファイル保存先ルートディレクトリDNS
+   * @param string $dsn ファイル保存先DNS
    */
   public function removeProvider($dsn){
     if(is_array($this->dsn_map) && isset($this->dsn_map[$dsn])){
@@ -133,18 +134,16 @@ class Storage {
    * put contents to uri. like file_put_contents
    * @param string $uri
    * @param string $contents
-	 * @param boolean $recursive
+   * @param array $options
+	 * @param boolean $autoCommit
    */
-  public function putContents($uri,$contents,$options=array()){
-    $tmp = tempnam(sys_get_temp_dir(),'snb_tmp_');
-    if(false !== file_put_contents($tmp,$contents)){
-      $this->put($tmp,$uri,$options);
-    } else {
-      throw new Exception('Fail to write local temp file! '.$tmp.' '.$uri,0,null);
-    }
+  public function putContents($uri,$contents,$options=array(),$autoCommit=true){
+    $file = $this->createFile($uri,$options,$autoCommit);
+    $file->putContents($contents);
   }
   /**
-   * get uri contents as strings. move like file_get_contents
+   * Get uri contents as strings. move like file_get_contents.
+   * This method get direct from the storage provider.
    * @param string $uri
    * @return string file contents
    */

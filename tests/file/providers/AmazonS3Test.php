@@ -17,7 +17,7 @@ require_once 'file/providers/AmazonS3.php';
  * export SNB_AWS_PHPSDK SNB_AWS_KEY SNB_AWS_SECRET SNB_AWS_S3_BUCKET SNB_AWS_REGION_NAME SNB_AWS_S3_REGION_HOST
  * </pre>
  */
-class AmazonS3Test extends \PHPUnit_Framework_TestCase
+class AmazonS3Test extends \snb\TestBase
 {
   /**
    * @var AmazonS3
@@ -45,6 +45,7 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
    */
   public function setUp()
   {
+    parent::setUp();
     require_once($_SERVER['SNB_AWS_PHPSDK']);
     $this->path_example = DIR_TEST.'/fixtures/example.txt';
     $this->uri = 'example.txt';
@@ -70,6 +71,7 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
   public function tearDown()
   {
     $this->object->disconnect();
+    parent::tearDown();
   }
 
   /**
@@ -118,6 +120,9 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
    */
   public function testPut()
   {
+    if($this->markIncompleteIfNoNetwork()){
+      return true;
+    }
     $expected = file_get_contents($this->path_example);
     // put a example file
     $options = array('contentType'=>'text/plain;charset=UTF8');
@@ -142,6 +147,9 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
    */
   public function testGet()
   {
+    if($this->markIncompleteIfNoNetwork()){
+      return true;
+    }
     $expected = file_get_contents($this->path_example);
     // get as a file
     $tmp = tempnam(sys_get_temp_dir(),'snb_file_test_');
@@ -163,6 +171,9 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
    */
   public function testGetFail()
   {
+    if($this->markIncompleteIfNoNetwork()){
+      return true;
+    }
     // not exists
     $result = $this->object->get('notexist.txt');
     $this->assertNull($result);
@@ -176,88 +187,13 @@ class AmazonS3Test extends \PHPUnit_Framework_TestCase
    */
   public function testRemove()
   {
+    if($this->markIncompleteIfNoNetwork()){
+      return true;
+    }
     // remove
     $this->object->remove($this->uri);
     $result = $this->httpRequest($this->url,null);
     $this->assertNotEquals('200',$result['code']);
   }
 
-  /**
-   * request
-   */
-  protected function httpRequest($url,$contentsMap=null,$method='get'){
-    $options = array(
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_HEADER         => true,
-      CURLOPT_FOLLOWLOCATION => true,
-      CURLOPT_ENCODING       => "",
-      CURLOPT_USERAGENT      => 'Test User Agent',
-      CURLOPT_AUTOREFERER    => true,
-      CURLOPT_CONNECTTIMEOUT => 10,
-      CURLOPT_TIMEOUT        => 10,
-      CURLOPT_MAXREDIRS      => 10,
-      CURLOPT_URL            => $url,
-      CURLOPT_SSL_VERIFYPEER => false,
-    );
-    $strings = '';
-    if(!is_null($contentsMap)){
-      $strings = '';
-      $lines   = array();
-      foreach($contentsMap as $key=>$val){
-        $line = urlencode($key)."=".urlencode($val);
-        $lines[] = $line;
-      }
-      if(count($lines)>0){
-        $strings = implode('&',$lines);
-        if('put'==strtolower($method)){
-          // todo
-        } else if('delete'==strtolower($method)){
-          // todo
-        } else if('post'==strtolower($method)){
-          $options[CURLOPT_POST] = true;
-          $options[CURLOPT_POSTFIELDS] = $strings;
-        }
-      }
-    }
-
-    $ch = curl_init($url);
-    curl_setopt_array($ch,$options);
-    $content = curl_exec($ch);
-    $info    = curl_getinfo($ch);
-    $result  = array(
-      'result'   => 'NG',
-      'url'      => $url,
-      'code'     => $info['http_code'],
-      'errno'    => curl_errno($ch),
-      'error'    => curl_error($ch),
-      'info'     => $info,
-      'headers'  => array(),
-      'body'     => null
-    );
-    $msg = $method.' '.$url."\n".$strings."\n".print_r($info,true);
-    if($content!==false){
-      $result['result'] = 'OK';
-      $header = substr($content,0,$info['header_size']);
-      $body   = substr($content,$info['header_size']);
-      $result['body'] = $body;
-      $header = str_replace("\r\n","\n",$header);
-      $header = str_replace("\r","\n",$header);
-      $headerLines = explode("\n",$header);
-      $headerMap = array();
-      foreach($headerLines as $line){
-        if(strpos($line,': ')!==false){
-          list($key,$value) = explode(': ',$line);
-          if(isset($headerMap[$key]) && is_scalar($headerMap[$key]) && strlen($headerMap[$key])>0){
-            $headerMap[$key] = array($headerMap[$key],trim($line));
-          } else if(isset($headerMap[$key]) && is_array($headerMap[$key])){
-            $headerMap[$key][] = trim($line);
-          } else {
-            $headerMap[$key] = trim($line);
-          }
-        }
-      }
-      $result['headers'] = $headerMap;
-    }
-    return $result;
-  }
 }
