@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="snb-file" basedir="." default="test">
   <target name="test">
+    <mkdir dir="tests/work" />
+    <mkdir dir="tests/tmp" />
     <mkdir dir="reports" />
     <mkdir dir="reports/coverage" />
     <coverage-setup database="reports/coverage.db">
