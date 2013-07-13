@@ -9,14 +9,18 @@ require_once dirname(dirname(__FILE__)).'/Exception.php';
  *
  * e.g. local:///home/foo/var
  *
- * [Initialize Options]  none.
+ * [Initialize Options]
+ * 'permission' => 8進数 Unix形式で指定。
+ * 'folder_permission' =>  8進数 Unix形式で指定。
  *
  * [File options]
  * 'permission' => 8進数 Unix形式で指定。
+ * 'folder_permission' =>  8進数 Unix形式で指定。
  * 
  * e.g)
  * $options = array(
- *   'permission' => 0755
+ *   'permission' => 0644
+ *   'folder_permission' => 0755
  * );
  * $file = snb\file\Storage.createFile('example.txt',$options); 
  * $file->open('w');
@@ -61,6 +65,12 @@ class Local extends \snb\file\Provider {
     }
     $this->base_path = preg_replace('/\/$/','',$path);
     $this->options = $options;
+    if(!isset($this->options['permission'])){
+      $this->options['permission'] = 644;
+    }
+    if(!isset($this->options['folder_permission'])){
+      $this->options['folder_permission'] = 755;
+    }
   }
   /**
 	 * (non-PHPdoc)
@@ -92,9 +102,13 @@ class Local extends \snb\file\Provider {
    * @param array $options
 	 */
 	public function put($srcPath,$dstUri,$options=array()){
+    $options = array_merge($this->options,$options);
     $filePath = $this->getRealPath($dstUri);
+    $dirPath  = dirname($filePath);
+    if(!is_dir($dirPath){
+      mkdir($dirPath,$options['folder_permission'],true);
+    }
     if(@copy($srcPath,$filePath)){
-      $options = array_merge($this->options,$options);
       if(isset($options['permission'])){
         @chmod($filePath,$options['permission']);
       }

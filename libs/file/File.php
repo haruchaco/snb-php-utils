@@ -34,6 +34,11 @@ class File {
    */
   private $storage = null;
   /**
+   * worker provider object.
+   * @var Provider
+   */
+  private $worker = null;
+  /**
    * file uri on all storages
    * @var string
    */
@@ -70,14 +75,24 @@ class File {
   private $auto_commit = true;
   /**
    * Constructor
-   * @param string $dns ファイル保存先ルートディレクトリDNS
-   * @param array $options 保存先接続オプション情報
+   * @param Storage $storage
+   * @param string $uri
+   * @param array $options 保存先オプション情報
+   * @param boolean $autoCommit
    */
   public function __construct(Storage $storage,$uri,array $options=array(),$autoCommit=true){
     $this->storage = $storage;
     $this->uri = $uri;
     $this->options = $options;
     $this->auto_commit = $autoCommit;
+    $this->initialize();
+  }
+  /**
+   * Set worker provider
+   * @param Provider $worker
+   */
+  public function setWorker(Provider $worker){
+    $this->worker = $worker;
   }
   /**
    * open file
@@ -88,22 +103,6 @@ class File {
       throw new Exception('This instance already open another uri file!');
     }
     $this->mode = $mode;
-    $this->tmp  = tempnam(sys_get_temp_dir(),'snb_tmp_');
-    $this->privious = tempnam(sys_get_temp_dir(),'snb_priv_');
-    // ファイルがDNSのいずれかに存在するなら取得して一時ファイルにコピー
-    try {
-      $this->storage->get($this->uri,$this->tmp);
-    } catch(Exception $e){
-      // nothing to do
-    }
-    // rollbackのためにオープン時の状態をもう一つ保存
-    if(file_exists($this->tmp) && filesize($this->tmp)>0){
-      copy($this->tmp,$this->privious);
-    } else {
-      touch($this->tmp);
-      $this->privious = null;
-    }
-
     $this->handle  = @fopen($this->tmp, $this->mode);
     if( false === $this->handle ){
       throw new Exception('Fail to open file '.$this->tmp);
@@ -163,14 +162,61 @@ class File {
     }
   }
   /**
-   * comit at close a file.
+   * import a local file.
+   * this method does not require to open.
+   * @param string $path local file path
+   */
+  public function import($path){
+    @unlink($this->tmp);
+    copy($path,$this->tmp);
+    if($this->auto_commit){
+      $this->commit();
+    }
+  }
+  /**
+   * put contents to this file.
+   * this method does not require to open.
+   * @param string $contents
+   */
+  public function putContents($contents){
+    if(false === file_put_contents($this->tmp,$contents)){
+      throw new Exception('Fail to write local temp file! '.$this->tmp.' '.$this->uri,0,null);
+    }
+    if($this->auto_commit){
+      $this->commit();
+    }
+  }
+  /**
+   * get contents from this file.
+   * this method does not need to open.
+   * @return string file contents
+   */
+  public function getContents(){
+    return file_get_contents($this->tmp);
+  }
+  /**
+   * remove this file.
+   */
+  public function remove(){
+    if(!is_null($this->tmp) && file_exists($this->tmp)){
+      @unlink($this->tmp);
+    }
+    $this->tmp = null;
+    if($this->auto_commit){
+      $this->commit();
+    }
+  }
+  /**
+   * comit and close a file.
    */
   public function commit(){
-    if(!$this->canCommit()){
-      throw new Exception('No file for commit!',0);
+    if(is_null($this->tmp) || !file_exists($this->tmp)){
+      $this->storage->remove($this->uri);
+    } else {
+      $this->storage->put($this->tmp,$this->uri,$this->options);
     }
-    $this->storage->put($this->tmp,$this->uri,$this->options);
-    $this->finalize();
+    $this->clean();
+    $this->initialize();
   }
   /**
    * rollback
@@ -182,39 +228,42 @@ class File {
     } else {
       $this->storage->put($this->privious,$this->uri,$this->options);
     }
-    $this->finalize();
+    $this->clean();
+    $this->initialize();
   }
   /**
-   * finalize
+   * clean
    */
-  private function finalize(){
+  public function clean(){
     if(!is_null($this->tmp) && file_exists($this->tmp)){
       @unlink($this->tmp);
     }
     if(!is_null($this->privious) && file_exists($this->privious)){
       @unlink($this->privious);
     }
-    $this->tmp = null;
-    $this->privious = null;
-    $this->uri = null;
-    $this->handle = null;
   }
   /**
-   * can commit
+   * initialize temporary files
    */
-  private function canCommit(){
-    if(is_null($this->uri) || is_null($this->tmp)
-      || !file_exists($this->tmp)){
-      return false;
+  public function initialize(){
+    // todo workerを利用するように書き換える
+    $this->tmp  = tempnam(sys_get_temp_dir(),'snb_tmp_');
+    $this->privious = tempnam(sys_get_temp_dir(),'snb_priv_');
+    $this->storage->get($this->uri,$this->privious);
+    if(file_exists($this->previous) && filesize($this->previous)>0){
+      copy($this->privious,$this->tmp);
+    } else {
+      @unlink($this->privious);
+      $this->privious = null;
+      touch($this->tmp);
     }
-    return true;
   }
   /**
    * is opened
    * @return boolean true if already opend
    */
   private function isOpened(){
-    if(is_null($this->uri) || is_null($this->handle) || is_null($this->tmp)){
+    if(is_null($this->uri) || is_null($this->handle)){
       return false;
     }
     return true;
