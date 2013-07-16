@@ -10,12 +10,44 @@ class TestBase extends \PHPUnit_Framework_TestCase
    */
   protected static $network = null;
   /**
+   * test file org path
+   */
+  protected $org_example;
+  /**
+   * path local
+   */
+  protected $path_example;
+  /**
+   * テスト用example.txtのURI
+   */
+  protected $uri_example;
+
+  /**
    * Sets up the fixture, for example, opens a network connection.
    * This method is called before a test is executed.
    */
   protected function setUp()
   {
     parent::setUp();
+    if(is_dir(DIR_TEST.'/work')){
+      chmod(DIR_TEST.'/work',0777);
+    } else {
+      mkdir(DIR_TEST.'/work',0777);
+    }
+    if(is_dir(DIR_TEST.'/tmp')){
+      chmod(DIR_TEST.'/tmp',0777);
+    } else {
+      mkdir(DIR_TEST.'/tmp',0777);
+    }
+    $this->org_example = DIR_TEST.'/fixtures/example.txt';
+    $this->uri_example  = '/testdir/child/example.txt';
+    $this->path_example = DIR_TEST.'/work'.$this->uri_example;
+    $pathDir = dirname($this->path_example);
+    // workフォルダにコピー
+    if(!is_dir($pathDir)){
+      mkdir($pathDir,0777,true);
+    }
+    copy($this->org_example,DIR_TEST.'/work'.$this->uri_example);
   }
 
   /**
@@ -24,7 +56,30 @@ class TestBase extends \PHPUnit_Framework_TestCase
    */
   protected function tearDown()
   {
+    $this->removeDirectory(DIR_TEST.'/work'); 
+    $this->removeDirectory(DIR_TEST.'/tmp'); 
     parent::tearDown();
+  }
+  /**
+   * remove directory
+   */
+  protected function removeDirectory($path){
+    if(is_dir($path) && strlen($path)>strlen(DIR_TEST)){
+      chmod($path,0755);
+      $files = scandir($path);
+      foreach($files as $file){
+        if(strpos($file,'.')===0){
+        } else {
+          $tp = $path.(preg_match('/\/$/',$path)>0 ? '' : '/').$file;
+          if(is_dir($tp)){
+            $this->removeDirectory($tp);
+          } else if(is_file($tp)){
+            unlink($tp);
+          }
+        }
+      }
+      @rmdir($path);
+    }
   }
 
   /**
@@ -145,4 +200,40 @@ class TestBase extends \PHPUnit_Framework_TestCase
     }
     return $result;
   }
+  
+  /**
+   * get example file contents
+   * @return string example file contents
+   */
+  protected function getExampleContents(){
+    return file_get_contents($this->org_example);
+  }
+
+  /**
+   * assert local providers writing
+   */
+  protected function assertLocalWritten($dsn,$expected,$uri){
+    $path = $this->getLocalPathUsingUri($dsn,$uri);
+    $result = file_get_contents($path);
+    $this->assertEquals($expected,$result);
+  }
+
+  /**
+   * get local path using dsn and uri.
+   * provider\Local
+   */
+  protected function getLocalPathUsingUri($dsn,$uri){
+    $dir = str_replace('local://','',$dsn);
+    return $dir.(preg_match('/^\//',$uri)>0 ? '':'/').$uri;
+  }
+
+  /**
+   * assertion the file is deleted
+   */
+  protected function assertLocalDeleted($dsn,$uri){
+    $dir = str_replace('local://','',$dsn);
+    $path = $dir.$uri;
+    $this->assertFalse(file_exists($path));
+  }
+
 }

@@ -57,30 +57,22 @@ class AmazonS3 extends \snb\file\Provider {
    */
   private $s3 = null;
   /**
-   * options
-   */
-  private $options = array();
-  /**
    * constructor
    */
   public function __construct(){
     $this->options = array();
+    $this->region = null;
+    $this->bucket_name = null;
   }
 	/**
-	 * (non-PHPdoc)
+	 * prepare connect an AmazonS3 bucket.
+   * @param string $dsn 'amazon_s3://[region name]/[bucket_name]/'
+   * @param array $options map. see the AmazonS3 options.
 	 * @see Provider::connect()
 	 */
 	public function connect($dsn,$options=array()){
-    // check the folder permision
-    list($name,$path) = explode('://',$dsn);
-    if('amazon_s3'!==strtolower($name)){
-      throw new \snb\file\Exception('Invalid dsn strings!',
-        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
-    } else if(strlen(trim($path))==0){
-      throw new \snb\file\Exception('The bucket name is null!',
-        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
-    }
-    list($this->region,$this->bucket_name) = explode('/',$path);
+    $this->perseDsn($dsn);
+    list($this->region,$this->bucket_name) = explode('/',$this->provider_root);
     $this->options = $options;
     // region
     $region = constant('\AmazonS3::'.$this->region);
@@ -90,10 +82,13 @@ class AmazonS3 extends \snb\file\Provider {
 		$this->s3->set_region($this->region);
   }
   /**
-	 * (non-PHPdoc)
+   * disconnect.
+   * reset the member variables.
 	 * @see Provider::disconnect()
    */
   public function disconnect(){
+    $this->provider_name = null;
+    $this->provider_root = null;
     $this->region = null;
     $this->bucket_name = null;
     $this->s3 = null;
