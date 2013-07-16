@@ -123,7 +123,7 @@ class File {
     if( is_null($length) ) {
       return fgets($this->handle);
     } else {
-      return fgets($this->handle, $length);
+      return fgets($this->handle, $length+1);
     }
   }
   /**
@@ -141,6 +141,7 @@ class File {
     $this->checkOpen();
 		@flock($this->handle, LOCK_UN);
 		@fclose($this->handle);
+    $this->handle = null;
 		// if read only, return
 		if(strpos($this->mode,'r') !== false){
 			return true;
@@ -258,7 +259,7 @@ class File {
    * @return boolean true if already opend
    */
   private function isOpened(){
-    if(is_null($this->uri) || is_null($this->handle)){
+    if(is_null($this->handle)){
       return false;
     }
     return true;

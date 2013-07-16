@@ -99,10 +99,12 @@ class AmazonS3Test extends \snb\TestBase
   /**
    * @covers snb\file\providers\AmazonS3::connect
    * @covers snb\file\providers\AmazonS3::__construct
+   * @covers snb\file\Provider::getInstance
    * @covers snb\file\Provider::perseDsn
    */
   public function testConnect()
   {
+    $this->object = \snb\file\Provider::getInstance($this->dsn,$this->options);
     $this->object = new AmazonS3;
     $this->object->connect($this->dsn,$this->options);
   }

@@ -82,8 +82,7 @@ class FileTest extends \snb\TestBase
    * @covers snb\file\File::__construct
    * @covers snb\file\File::open
    * @covers snb\file\File::write
-   * @covers snb\file\File::isOpend
-   * @covers snb\file\File::checkOpen
+   * @covers snb\file\File::isOpened
    * @covers snb\file\File::close
    * @covers snb\file\File::getContents
    */
@@ -106,7 +105,7 @@ class FileTest extends \snb\TestBase
   
   /**
    * @covers snb\file\File::gets
-   * @covers snb\file\File::isOpend
+   * @covers snb\file\File::checkOpen
    * @covers snb\file\File::checkOpen
    */
   public function testGets()
@@ -122,6 +121,24 @@ class FileTest extends \snb\TestBase
     $this->assertEquals($lines[2]."\n",$result);
     $result = $this->object->gets();
     $this->object->close();
+    // length
+    $expected = substr($this->test_string,0,5);
+    $this->object->open('r');
+    $result = $this->object->gets(5);
+    $this->assertEquals($expected,$result);
+    $this->object->close();
+
+  }
+
+  /**
+   * @covers snb\file\File::gets
+   * @covers snb\file\File::checkOpen
+   * @covers snb\file\File::checkOpen
+   * @expectedException snb\file\Exception
+   */
+  public function testGetsExceptionCheckOpen()
+  {
+    $this->object->gets();
   }
 
   /**
@@ -143,7 +160,7 @@ class FileTest extends \snb\TestBase
    * @covers snb\file\File::__construct
    * @covers snb\file\File::open
    * @covers snb\file\File::write
-   * @covers snb\file\File::isOpend
+   * @covers snb\file\File::isOpened
    * @covers snb\file\File::checkOpen
    * @covers snb\file\File::close
    * @covers snb\file\File::commit
@@ -180,7 +197,7 @@ class FileTest extends \snb\TestBase
    * @covers snb\file\Storage::rollback
    * @covers snb\file\File::initialize
    * @covers snb\file\File::clean
-   * @covers snb\file\File::isOpend
+   * @covers snb\file\File::isOpened
    * @covers snb\file\File::checkOpen
    */
   public function testRollback()
@@ -200,4 +217,33 @@ class FileTest extends \snb\TestBase
     $this->object->rollback();
     $this->assertFalse(file_exists($localPath));
   }
+
+  /**
+   * @covers snb\file\File::import
+   * @covers snb\file\File::commit
+   * @covers snb\file\Storage::commit
+   * @covers snb\file\File::initialize
+   * @covers snb\file\File::clean
+   */
+  public function testImport()
+  {
+    $expected = $this->getExampleContents();
+    $this->object->import($this->org_example);
+    $this->assertLocalWritten($this->dsn,$expected,$this->uri);
+  }
+
+  /**
+   * @covers snb\file\File::putContents
+   * @covers snb\file\File::commit
+   * @covers snb\file\Storage::commit
+   * @covers snb\file\File::initialize
+   * @covers snb\file\File::clean
+   */
+  public function testPutContents()
+  {
+    $expected = $this->getExampleContents();
+    $this->object->putContents($expected);
+    $this->assertLocalWritten($this->dsn,$expected,$this->uri);
+  }
+
 }

@@ -98,11 +98,13 @@ class Local extends \snb\file\Provider {
    * @param array $options
 	 */
 	public function put($srcPath,$dstUri,$options=array()){
+    clearstatcache();
     $options = array_merge($this->options,$options);
     $filePath = $this->getRealPath($dstUri);
     $dirPath  = dirname($filePath);
-    if(!is_dir($dirPath)){
-      mkdir($dirPath,$options['folder_permission'],true);
+    if(!is_dir($dirPath) && !@mkdir($dirPath,$options['folder_permission'],true)){
+      throw new \snb\file\Exception('Fail to mkdir! '.$dirPath,
+        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
     }
     if(@copy($srcPath,$filePath)){
       if(isset($options['permission'])){
@@ -119,9 +121,24 @@ class Local extends \snb\file\Provider {
 	 * @param boolean $recursive
 	 */
 	public function remove($dstUri,$recursive=false){
+    clearstatcache();
     $filePath = $this->getRealPath($dstUri);
     if(file_exists($filePath)){
       if(is_dir($filePath)){
+        if(!is_executable($filePath)){
+          throw new \snb\file\Exception('Fail to remove dir because permission denied! '.$filePath,
+            \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+        }
+        $files = scandir($filePath);
+        if($recursive){
+          $this->removeDir($filePath);
+        } else if(count($files)>2){
+          throw new \snb\file\Exception('Fail to remove dir because that has files! '.$filePath,
+            \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+        } else if(!@rmdir($filePath)){
+          throw new \snb\file\Exception('Fail to remove dir! '.$filePath,
+            \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+        }
       } else {
         unlink($filePath);
       }
@@ -133,5 +150,33 @@ class Local extends \snb\file\Provider {
   private function getRealPath($uri){
     $path = $this->base_path.'/'.(preg_replace('/^\//','',$uri));
     return $path;
+  }
+  /**
+   * remove dir recursive
+   * @param string $path
+   */
+  private function removeDir($path){
+    clearstatcache();
+    if(is_dir($path) && strlen($path)>strlen($this->base_path)){
+      if(!is_executable($path)){
+        throw new \snb\file\Exception('Fail to remove dir because permission denied! '.$path,
+          \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+      }
+      $files = scandir($path);
+      foreach($files as $file){
+        $tp = $path.(preg_match('/\/$/',$path)>0 ? '' : '/').$file;
+        if(strpos($file,'.')===0){
+          // nothing to do
+        } else if(is_file($tp)){
+          if(!unlink($tp)){
+            throw new \snb\file\Exception('Fail to remove file! '.$tp,
+              \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+          }
+        } else if(is_dir($tp)){
+          $this->removeDir($tp);
+        }
+      }
+      @rmdir($path);
+    }
   }
 }

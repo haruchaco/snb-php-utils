@@ -27,6 +27,7 @@ class LocalTest extends \snb\TestBase
     $this->dsn = 'local://'.DIR_TEST.'/work';
     // new
     $this->object = new Local;
+    clearstatcache();
   }
 
   /**
@@ -46,6 +47,11 @@ class LocalTest extends \snb\TestBase
    * connect
    */
   protected function connect(){
+    // none options
+    $this->object->connect($this->dsn);
+    // null options
+    $this->object->connect($this->dsn,null);
+    // use options
     $options = array('permission' => 0644);
     $this->object->connect($this->dsn,$options);
   }
@@ -148,6 +154,7 @@ class LocalTest extends \snb\TestBase
    */
   public function testPut()
   {
+    clearstatcache();
     $putUri = 'put.txt';
     $expectedPath = DIR_TEST.'/work/put.txt';
     $this->connect();
@@ -167,16 +174,60 @@ class LocalTest extends \snb\TestBase
     $perms = fileperms($expectedPath);
     $this->assertEquals('0600',substr(sprintf('%o',$perms),-4));
     unlink($expectedPath);
+    // 存在しないディレクトリが作成されるかテスト
+    $putUri = '/tdir/child/gchild/put.txt';
+    $expectedPath = DIR_TEST.'/work/tdir/child/gchild/put.txt';
+    $this->object->put($this->org_example,$putUri,array('permission'=>0600,'folder_permission'=>0755));
+    $this->assertTrue(file_exists($expectedPath));
+    $this->assertEquals(file_get_contents($this->org_example),file_get_contents($expectedPath));
+    $perms = fileperms($expectedPath);
+    $this->assertEquals('0600',substr(sprintf('%o',$perms),-4));
+    unlink($expectedPath);
+    $this->removeDirectory(DIR_TEST.'/work/tdir');
+  }
+
+  /**
+   * @covers snb\file\providers\Local::put
+   * @expectedException snb\file\Exception
+   */
+  public function testPutExceptionCopy(){
+    clearstatcache();
+    $this->connect();
+    $putUri = '/tdir/child/gchild/put.txt';
+    $expectedPath = DIR_TEST.'/work/tdir/child/gchild/put.txt';
+    $this->object->put($this->org_example,$putUri,array('permission'=>0644,'folder_permission'=>0755));
+    // exception
+    chmod($expectedPath,0111);
+    $this->object->put($this->org_example,$putUri,array('permission'=>0644,'folder_permission'=>0755));
+    chmod($expectedPath,0666);
+  }
+
+  /**
+   * @covers snb\file\providers\Local::put
+   * @expectedException snb\file\Exception
+   */
+  public function testPutExceptionDir(){
+    clearstatcache();
+    $this->connect();
+    $putUri = '/tdir/child/gchild/put.txt';
+    $expectedPath = DIR_TEST.'/work/tdir/child/gchild/put.txt';
+    $gpDir = dirname(dirname($expectedPath));
+    if(!is_dir($gpDir)){
+      mkdir($gpDir,0755,true);
+    }
+    chmod($gpDir,0000);
+    $this->object->put($this->org_example,$putUri,array('permission'=>0644,'folder_permission'=>0755));
   }
 
   /**
    * @covers snb\file\providers\Local::remove
+   * @covers snb\file\providers\Local::removeDir
    * @covers snb\file\providers\Local::getRealPath
    */
   public function testRemove()
   {
-    $putUri = 'put.txt';
-    $expectedPath = DIR_TEST.'/work/put.txt';
+    $putUri = '/tdir/child/put.txt';
+    $expectedPath = DIR_TEST.'/work/tdir/child/put.txt';
     $this->connect();
     $this->object->put($this->org_example,$putUri);
     // 最初はある
@@ -187,5 +238,64 @@ class LocalTest extends \snb\TestBase
     $result = $this->object->get($putUri);
     $this->assertNull($result);
     $this->assertFalse(file_exists($expectedPath));
+    // ディレクトリごと削除
+    $this->object->put($this->org_example,$putUri);
+    $this->object->remove(dirname(dirname($putUri)),true);
   }
+
+  /**
+   * @covers snb\file\providers\Local::remove
+   * @covers snb\file\providers\Local::removeDir
+   * @covers snb\file\providers\Local::getRealPath
+   * @expectedException snb\file\Exception
+   */
+  public function testRemoveExceptionContains()
+  {
+    $putUri = '/tdir/child/put.txt';
+    $expectedPath = DIR_TEST.'/work/tdir/child/put.txt';
+    $this->connect();
+    $this->object->put($this->org_example,$putUri);
+    $this->object->remove(dirname($putUri));
+  }
+
+  /**
+   * @covers snb\file\providers\Local::remove
+   * @covers snb\file\providers\Local::removeDir
+   * @covers snb\file\providers\Local::getRealPath
+   * @expectedException snb\file\Exception
+   */
+  public function testRemoveExceptionPermission()
+  {
+    $putUri = '/tdir/child/put.txt';
+    $expectedPath = DIR_TEST.'/work/tdir/child/put.txt';
+    $this->connect();
+    $this->object->put($this->org_example,$putUri);
+    $this->object->remove($putUri);
+    chmod(dirname($expectedPath),0000);
+    $this->object->remove(dirname($putUri));
+  }
+
+  /**
+   * @covers snb\file\providers\Local::remove
+   * @covers snb\file\providers\Local::removeDir
+   * @covers snb\file\providers\Local::getRealPath
+   * @expectedException snb\file\Exception
+   */
+  public function testRemoveExceptionPermissionRecursive()
+  {
+    clearstatcache();
+    $putUri = '/t2dir/child/put.txt';
+    $expectedPath = DIR_TEST.'/work'.$putUri;
+    $this->connect();
+    $this->object->put($this->org_example,$putUri);
+    $this->assertTrue(file_exists($expectedPath));
+    $tcd = dirname($expectedPath);
+    $td = dirname($tcd);
+    $tcd2 = $td.'/test';
+    mkdir($tcd2,0000);
+    chmod($tcd2,0000);
+    $this->object->remove('/t2dir',true);
+    $this->assertFalse(is_dir($td));
+  }
+
 }

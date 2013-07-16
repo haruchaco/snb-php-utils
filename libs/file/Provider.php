@@ -53,15 +53,17 @@ abstract class Provider {
     $baseName = self::getProviderName($dsn);
     $file = dirname(__FILE__).'/providers/'.$baseName.'.php';
     $className = 'snb\\file\\providers\\'.$baseName;
-    if(file_exists($file)){
-      require_once($file);
-      $obj = new $className;
-      $obj->connect($dsn,$options);
-      self::$providers[$dsn] = $obj;
-      return $obj;
-    } else {
-      throw new Exception('File storage provider '.$baseName.' is not found!',0);
+    if(!class_exists($className)){
+      if(file_exists($file)){
+        require_once($file);
+      } else {
+        throw new Exception('File storage provider '.$baseName.' is not found!',0);
+      }
     }
+    $obj = new $className;
+    $obj->connect($dsn,$options);
+    self::$providers[$dsn] = $obj;
+    return $obj;
   }
 
   /**
