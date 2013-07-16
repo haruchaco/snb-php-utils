@@ -33,7 +33,7 @@ require_once dirname(dirname(__FILE__)).'/Exception.php';
  */
 class Local extends \snb\file\Provider {
   /**
-   * base path to save files
+   * @var string base path to save files
    */
   private $base_path = null;
   /**
@@ -44,7 +44,10 @@ class Local extends \snb\file\Provider {
     $this->base_path = null;
   }
 	/**
-	 * (non-PHPdoc)
+   * connect a local file system.
+   * and check the root path.
+   * @param string $dsn 'local://[local base folder path]'. e.g. 'local:///tmp/foo'
+   * @param array $options map has keys 'permission' and 'folder_permission'. e.g. array('permission'=>0666,'folder_permission'=>0755)
 	 * @see Provider::connect()
 	 */
 	public function connect($dsn,$options=array()){
@@ -64,7 +67,7 @@ class Local extends \snb\file\Provider {
     }
   }
   /**
-	 * (non-PHPdoc)
+   * disconnect and reset this object verialbles.
 	 * @see Provider::disconnect()
    */
   public function disconnect(){

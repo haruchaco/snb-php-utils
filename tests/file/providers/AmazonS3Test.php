@@ -76,6 +76,7 @@ class AmazonS3Test extends \snb\TestBase
 
   /**
    * @covers snb\file\providers\AmazonS3::connect
+   * @covers snb\file\Provider::perseDsn
    * @expectedException snb\file\Exception
    */
   public function testConnectFail1(){
@@ -86,6 +87,7 @@ class AmazonS3Test extends \snb\TestBase
 
   /**
    * @covers snb\file\providers\AmazonS3::connect
+   * @covers snb\file\Provider::perseDsn
    * @expectedException snb\file\Exception
    */
   public function testConnectFail2(){
@@ -97,6 +99,7 @@ class AmazonS3Test extends \snb\TestBase
   /**
    * @covers snb\file\providers\AmazonS3::connect
    * @covers snb\file\providers\AmazonS3::__construct
+   * @covers snb\file\Provider::perseDsn
    */
   public function testConnect()
   {

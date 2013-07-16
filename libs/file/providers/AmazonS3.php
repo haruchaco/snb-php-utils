@@ -65,7 +65,9 @@ class AmazonS3 extends \snb\file\Provider {
     $this->bucket_name = null;
   }
 	/**
-	 * (non-PHPdoc)
+	 * prepare connect an AmazonS3 bucket.
+   * @param string $dsn 'amazon_s3://[region name]/[bucket_name]/'
+   * @param array $options map. see the AmazonS3 options.
 	 * @see Provider::connect()
 	 */
 	public function connect($dsn,$options=array()){
@@ -80,7 +82,8 @@ class AmazonS3 extends \snb\file\Provider {
 		$this->s3->set_region($this->region);
   }
   /**
-	 * (non-PHPdoc)
+   * disconnect.
+   * reset the member variables.
 	 * @see Provider::disconnect()
    */
   public function disconnect(){

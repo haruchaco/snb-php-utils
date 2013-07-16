@@ -52,6 +52,7 @@ class LocalTest extends \snb\TestBase
 
   /**
    * @covers snb\file\providers\Local::connect
+   * @covers snb\file\Provider::perseDsn
    * @expectedException snb\file\Exception
    */
   public function testConnectInvalid1()
@@ -64,6 +65,7 @@ class LocalTest extends \snb\TestBase
 
   /**
    * @covers snb\file\providers\Local::connect
+   * @covers snb\file\Provider::perseDsn
    * @expectedException snb\file\Exception
    */
   public function testConnectInvalid2()
@@ -76,6 +78,7 @@ class LocalTest extends \snb\TestBase
 
   /**
    * @covers snb\file\providers\Local::connect
+   * @covers snb\file\Provider::perseDsn
    * @expectedException snb\file\Exception
    */
   public function testConnectInvalid3()
@@ -88,6 +91,7 @@ class LocalTest extends \snb\TestBase
 
   /**
    * @covers snb\file\providers\Local::connect
+   * @covers snb\file\Provider::perseDsn
    * @covers snb\file\providers\Local::__construct
    */
   public function testConnect()
