@@ -56,6 +56,7 @@ class FileTest extends \snb\TestBase
   /**
    * @covers snb\file\File::__construct
    * @covers snb\file\File::open
+   * @covers snb\file\File::initialize
    * @covers snb\file\File::close
    */
   public function testOpen()
@@ -66,6 +67,7 @@ class FileTest extends \snb\TestBase
   /**
    * @covers snb\file\File::__construct
    * @covers snb\file\File::open
+   * @covers snb\file\File::initialize
    * @covers snb\file\File::close
    * @expectedException snb\file\Exception
    */
@@ -80,6 +82,8 @@ class FileTest extends \snb\TestBase
    * @covers snb\file\File::__construct
    * @covers snb\file\File::open
    * @covers snb\file\File::write
+   * @covers snb\file\File::isOpend
+   * @covers snb\file\File::checkOpen
    * @covers snb\file\File::close
    * @covers snb\file\File::getContents
    */
@@ -102,6 +106,8 @@ class FileTest extends \snb\TestBase
   
   /**
    * @covers snb\file\File::gets
+   * @covers snb\file\File::isOpend
+   * @covers snb\file\File::checkOpen
    */
   public function testGets()
   {
@@ -138,9 +144,12 @@ class FileTest extends \snb\TestBase
    * @covers snb\file\File::__construct
    * @covers snb\file\File::open
    * @covers snb\file\File::write
+   * @covers snb\file\File::isOpend
+   * @covers snb\file\File::checkOpen
    * @covers snb\file\File::close
    * @covers snb\file\File::commit
    * @covers snb\file\File::remove
+   * @covers snb\file\File::clean
    * @covers snb\file\File::getContents
    */
   public function testWriteWithTransaction()
@@ -167,7 +176,11 @@ class FileTest extends \snb\TestBase
   }
  
   /**
-   * @covers snb\file\File::rolback
+   * @covers snb\file\File::rollback
+   * @covers snb\file\File::initialize
+   * @covers snb\file\File::clean
+   * @covers snb\file\File::isOpend
+   * @covers snb\file\File::checkOpen
    */
   public function testRollback()
   {
