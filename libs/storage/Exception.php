@@ -1,22 +1,22 @@
 <?php
 /**
- * snb\file\Exception.php class file.
+ * snb\storage\Exception.php class file.
  *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the Apache2 License. For more information please see
  * <http://github.com/haruchaco>
  */
 
-namespace snb\file;
+namespace snb\storage;
 
 /**
- * Original exception class for snb\file.
+ * Original exception class for snb\storage.
  *
- * snb\fileパッケージ用の例外クラス。
+ * snb\storageパッケージ用の例外クラス。
  * 
  * @author    Masanori Nakashima <>
  * @version   $Id$
- * @package   snb\file
+ * @package   snb\storage
  */
 class Exception extends \Exception {
   /**

@@ -1,5 +1,5 @@
 <?php
-namespace snb\file\providers;
+namespace snb\storage\providers;
 require_once dirname(dirname(__FILE__)).'/Provider.php';
 require_once dirname(dirname(__FILE__)).'/Exception.php';
 /**
@@ -40,10 +40,10 @@ require_once dirname(dirname(__FILE__)).'/Exception.php';
  * - contentType ... content-type
  *
  *
- * @package snb\file\providers
+ * @package snb\storage\providers
  * @autthe Masanori Nakashima
  */
-class AmazonS3 extends \snb\file\Provider {
+class AmazonS3 extends \snb\storage\Provider {
   /**
    * region
    */
@@ -114,8 +114,8 @@ class AmazonS3 extends \snb\file\Provider {
         return true;
       }
 		}
-    throw new \snb\file\Exception('Fail to download from amazon s3!',
-      \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+    throw new \snb\storage\Exception('Fail to download from amazon s3!',
+      \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
   }
 	/**
 	 * put file
@@ -136,8 +136,8 @@ class AmazonS3 extends \snb\file\Provider {
 		if ($response->isOK()) {
       return true;
 		} else {
-      throw new \snb\file\Exception('Fail to upload to amazon s3!',
-        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+      throw new \snb\storage\Exception('Fail to upload to amazon s3!',
+        \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
     }
   }
 	/**

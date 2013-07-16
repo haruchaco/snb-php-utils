@@ -1,13 +1,13 @@
 <?php
 /**
- * snb\file\Storage.php class file.
+ * snb\storage\Storage.php class file.
  *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the Apache2 License. For more information please see
  * <http://github.com/haruchaco>
  */
 
-namespace snb\file;
+namespace snb\storage;
 require_once(dirname(__FILE__).'/Exception.php');
 require_once(dirname(__FILE__).'/File.php');
 require_once(dirname(__FILE__).'/Provider.php');
@@ -16,7 +16,7 @@ require_once(dirname(__FILE__).'/Provider.php');
  * 
  * @author    Masanori Nakashima <>
  * @version   $Id$
- * @package   snb\file
+ * @package   snb\storage
  */
 class Storage {
   /**

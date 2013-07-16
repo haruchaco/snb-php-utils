@@ -1,5 +1,5 @@
 <?php
-namespace snb\file\providers;
+namespace snb\storage\providers;
 require_once dirname(dirname(__FILE__)).'/Provider.php';
 require_once dirname(dirname(__FILE__)).'/Exception.php';
 /**
@@ -22,16 +22,16 @@ require_once dirname(dirname(__FILE__)).'/Exception.php';
  *   'permission' => 0644
  *   'folder_permission' => 0755
  * );
- * $file = snb\file\Storage.createFile('example.txt',$options); 
+ * $file = snb\storage\Storage.createFile('example.txt',$options); 
  * $file->open('w');
  * $file->write("foo\nvar");
  * $file->close();
  * $file->commit();
  *
- * @package snb\file\providers
+ * @package snb\storage\providers
  * @autthe Masanori Nakashima
  */
-class Local extends \snb\file\Provider {
+class Local extends \snb\storage\Provider {
   /**
    * @var string base path to save files
    */
@@ -54,8 +54,8 @@ class Local extends \snb\file\Provider {
     $this->perseDsn($dsn);
     // check the folder permision
     if(!is_dir($this->provider_root)){
-      throw new \snb\file\Exception('The base path is not a directory! '.$this->provider_root,
-        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+      throw new \snb\storage\Exception('The base path is not a directory! '.$this->provider_root,
+        \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
     }
     $this->base_path = preg_replace('/\/$/','',$this->provider_root);
     $this->options = $options;
@@ -103,16 +103,16 @@ class Local extends \snb\file\Provider {
     $filePath = $this->getRealPath($dstUri);
     $dirPath  = dirname($filePath);
     if(!is_dir($dirPath) && !@mkdir($dirPath,$options['folder_permission'],true)){
-      throw new \snb\file\Exception('Fail to mkdir! '.$dirPath,
-        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+      throw new \snb\storage\Exception('Fail to mkdir! '.$dirPath,
+        \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
     }
     if(@copy($srcPath,$filePath)){
       if(isset($options['permission'])){
         @chmod($filePath,$options['permission']);
       }
     } else {
-      throw new \snb\file\Exception('Fail to copy file!',
-        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+      throw new \snb\storage\Exception('Fail to copy file!',
+        \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
     }
   }
 	/**
@@ -126,18 +126,18 @@ class Local extends \snb\file\Provider {
     if(file_exists($filePath)){
       if(is_dir($filePath)){
         if(!is_executable($filePath)){
-          throw new \snb\file\Exception('Fail to remove dir because permission denied! '.$filePath,
-            \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+          throw new \snb\storage\Exception('Fail to remove dir because permission denied! '.$filePath,
+            \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
         }
         $files = scandir($filePath);
         if($recursive){
           $this->removeDir($filePath);
         } else if(count($files)>2){
-          throw new \snb\file\Exception('Fail to remove dir because that has files! '.$filePath,
-            \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+          throw new \snb\storage\Exception('Fail to remove dir because that has files! '.$filePath,
+            \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
         } else if(!@rmdir($filePath)){
-          throw new \snb\file\Exception('Fail to remove dir! '.$filePath,
-            \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+          throw new \snb\storage\Exception('Fail to remove dir! '.$filePath,
+            \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
         }
       } else {
         unlink($filePath);
@@ -159,8 +159,8 @@ class Local extends \snb\file\Provider {
     clearstatcache();
     if(is_dir($path) && strlen($path)>strlen($this->base_path)){
       if(!is_executable($path)){
-        throw new \snb\file\Exception('Fail to remove dir because permission denied! '.$path,
-          \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+        throw new \snb\storage\Exception('Fail to remove dir because permission denied! '.$path,
+          \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
       }
       $files = scandir($path);
       foreach($files as $file){
@@ -169,8 +169,8 @@ class Local extends \snb\file\Provider {
           // nothing to do
         } else if(is_file($tp)){
           if(!unlink($tp)){
-            throw new \snb\file\Exception('Fail to remove file! '.$tp,
-              \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+            throw new \snb\storage\Exception('Fail to remove file! '.$tp,
+              \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
           }
         } else if(is_dir($tp)){
           $this->removeDir($tp);

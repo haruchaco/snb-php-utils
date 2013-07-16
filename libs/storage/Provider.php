@@ -1,13 +1,13 @@
 <?php
 /**
- * snb\file\Provider.php abstract class file.
+ * snb\storage\Provider.php abstract class file.
  *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the Apache2 License. For more information please see
  * <http://github.com/haruchaco>
  */
 
-namespace snb\file;
+namespace snb\storage;
 
 /**
  * 抽象ストレージプロバイダークラス
@@ -21,7 +21,7 @@ namespace snb\file;
  * </p>
  * @author    Masanori Nakashima <>
  * @version   $Id$
- * @package   snb\file
+ * @package   snb\storage
  */
 abstract class Provider {
   /**
@@ -52,7 +52,7 @@ abstract class Provider {
     }
     $baseName = self::getProviderName($dsn);
     $file = dirname(__FILE__).'/providers/'.$baseName.'.php';
-    $className = 'snb\\file\\providers\\'.$baseName;
+    $className = 'snb\\storage\\providers\\'.$baseName;
     if(!class_exists($className)){
       if(file_exists($file)){
         require_once($file);
@@ -75,11 +75,11 @@ abstract class Provider {
     $this->provider_name = strtolower($this->provider_name);
     $name = strtolower(basename(str_replace('\\','/',(preg_replace('/([0-9a-z])([A-Z])/','${1}_${2}',get_class($this))))));
     if($name !== $this->provider_name){
-      throw new \snb\file\Exception('Invalid dsn strings!',
-        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+      throw new \snb\storage\Exception('Invalid dsn strings!',
+        \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
     } else if(strlen(trim($this->provider_root))==0){
-      throw new \snb\file\Exception('The provider root is null!',
-        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+      throw new \snb\storage\Exception('The provider root is null!',
+        \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
     }
   }
  /**

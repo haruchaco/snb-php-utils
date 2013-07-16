@@ -1,13 +1,13 @@
 <?php
 /**
- * snb\file\File.php class file.
+ * snb\storage\File.php class file.
  *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the Apache2 License. For more information please see
  * <http://github.com/haruchaco>
  */
 
-namespace snb\file;
+namespace snb\storage;
 require_once(dirname(__FILE__).'/Storage.php');
 require_once(dirname(__FILE__).'/Exception.php');
 
@@ -25,7 +25,7 @@ require_once(dirname(__FILE__).'/Exception.php');
  * 
  * @author    Masanori Nakashima <>
  * @version   $Id$
- * @package   snb\file
+ * @package   snb\storage
  */
 class File {
   /**
@@ -266,7 +266,7 @@ class File {
   }
   /**
    * check this instance has already open a file.
-   * @throws snb\util\Exception
+   * @throws snb\storage\Exception
    */
   private function checkOpen(){
     if(!$this->isOpened()){
