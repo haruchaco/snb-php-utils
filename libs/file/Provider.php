@@ -25,13 +25,18 @@ namespace snb\file;
  */
 abstract class Provider {
   /**
-   * prividers
+   * @var array options
+   */
+  private $options = array();
+  /**
+   * @var array prividers
    */
   private static $providers = array();
    /**
    * get driver class instance
    * @param string $dsn
    * @param array $options
+   * @return Object class extends Provider
    */
   public static function getInstance($dsn,$options=array()){
     if(isset(self::$providers[$dsn])){

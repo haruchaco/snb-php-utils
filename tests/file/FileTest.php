@@ -126,7 +126,6 @@ class FileTest extends \snb\TestBase
 
   /**
    * @covers snb\file\File::eof
-   * @depends testGets
    */
   public function testEof()
   {
@@ -148,6 +147,7 @@ class FileTest extends \snb\TestBase
    * @covers snb\file\File::checkOpen
    * @covers snb\file\File::close
    * @covers snb\file\File::commit
+   * @covers snb\file\Storage::commit
    * @covers snb\file\File::remove
    * @covers snb\file\File::clean
    * @covers snb\file\File::getContents
@@ -177,6 +177,7 @@ class FileTest extends \snb\TestBase
  
   /**
    * @covers snb\file\File::rollback
+   * @covers snb\file\Storage::rollback
    * @covers snb\file\File::initialize
    * @covers snb\file\File::clean
    * @covers snb\file\File::isOpend

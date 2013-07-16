@@ -57,13 +57,11 @@ class AmazonS3 extends \snb\file\Provider {
    */
   private $s3 = null;
   /**
-   * options
-   */
-  private $options = array();
-  /**
    * constructor
    */
   public function __construct(){
+    $this->region = null;
+    $this->bucket_name = null;
     $this->options = array();
   }
 	/**

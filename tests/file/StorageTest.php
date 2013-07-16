@@ -258,10 +258,10 @@ class StorageTest extends \snb\TestBase
   }
 
   /**
-   * @covers snb\file\Storage::rolback
+   * @covers snb\file\Storage::rollback
    * @todo   Implement testRolback().
    */
-  public function testRolback()
+  public function testRollback()
   {
     // Remove the following lines when you implement this test.
     $this->markTestIncomplete(

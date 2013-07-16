@@ -37,13 +37,10 @@ class Local extends \snb\file\Provider {
    */
   private $base_path = null;
   /**
-   * options
-   */
-  private $options = array();
-  /**
    * constructor
    */
   public function __construct(){
+    $this->base_path = null;
     $this->options = array();
   }
 	/**

@@ -170,7 +170,7 @@ class Storage {
   /**
    * rollback
    */
-  public function rolback(){
+  public function rollback(){
     foreach($this->files as $file){
       $file->rollback();
     }
