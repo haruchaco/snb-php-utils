@@ -70,6 +70,15 @@ abstract class Provider {
    */
   protected function perseDsn($dsn){
     list($this->provider_name, $this->provider_root) = explode('://',$dsn);
+    $this->provider_name = strtolower($this->provider_name);
+    $name = strtolower(basename(str_replace('\\','/',(preg_replace('/([0-9a-z])([A-Z])/','${1}_${2}',get_class($this))))));
+    if($name !== $this->provider_name){
+      throw new \snb\file\Exception('Invalid dsn strings!',
+        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+    } else if(strlen(trim($this->provider_root))==0){
+      throw new \snb\file\Exception('The provider root is null!',
+        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
+    }
   }
  /**
    * get driver name

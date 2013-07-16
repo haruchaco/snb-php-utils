@@ -40,8 +40,8 @@ class Local extends \snb\file\Provider {
    * constructor
    */
   public function __construct(){
-    $this->base_path = null;
     $this->options = array();
+    $this->base_path = null;
   }
 	/**
 	 * (non-PHPdoc)
@@ -50,13 +50,7 @@ class Local extends \snb\file\Provider {
 	public function connect($dsn,$options=array()){
     $this->perseDsn($dsn);
     // check the folder permision
-    if('local'!==strtolower($this->provider_name)){
-      throw new \snb\file\Exception('Invalid dsn strings!',
-        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
-    } else if(strlen(trim($this->provider_root))==0){
-      throw new \snb\file\Exception('The base path is null!',
-        \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
-    } else if(!is_dir($this->provider_root)){
+    if(!is_dir($this->provider_root)){
       throw new \snb\file\Exception('The base path is not a directory! '.$this->provider_root,
         \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
     }
