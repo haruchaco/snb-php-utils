@@ -35,6 +35,11 @@ class Storage {
    */
   private $files = array();
   /**
+   * options merged
+   * @var array
+   */
+  private $options = array();
+  /**
    * Constructor
    * @param string $dsn ファイル保存先DNS
    * @param array $options 保存先接続オプション情報
@@ -53,6 +58,7 @@ class Storage {
    */
   public function createFile($uri,array $options=array(),$autoCommit=true){
     if(!isset($this->files[$uri])){
+      $options = array_merge($this->options,$options);
       $this->files[$uri] = new File($this,$uri,$options,$autoCommit);
     }
     $obj = & $this->files[$uri];
@@ -65,6 +71,7 @@ class Storage {
    */
   public function addProvider($dsn,$options=array()){
     $this->dsn_map[$dsn] = $options;
+    $this->options = array_merge($this->options,$options);
   }
   /**
    * Remove root dns

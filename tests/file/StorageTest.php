@@ -25,6 +25,7 @@ class StorageTest extends \snb\TestBase
    */
   public function setUp()
   {
+    parent::setUp();
     $this->dsnMap = array(
       'Local' => array(
         'dsn' => 'local:///Users/masanori/work/snb-php-utils/tests/work',
@@ -58,25 +59,6 @@ class StorageTest extends \snb\TestBase
   }
 
   /**
-   * assert local providers writing
-   */
-  protected function assertLocalWritten($dsn,$expected,$uri){
-    $dir = str_replace('local://','',$dsn);
-    $path = $dir."/".$uri;
-    $result = file_get_contents($path);
-    $this->assertEquals($expected,$result);
-  }
-
-  /**
-   * assertion the file is deleted
-   */
-  protected function assertLocalDeleted($dsn,$uri){
-    $dir = str_replace('local://','',$dsn);
-    $path = $dir."/".$uri;
-    $this->assertFalse(file_exists($path));
-  }
-
-  /**
    * file write
    * @covers snb\file\File::open
    * @covers snb\file\File::write
@@ -86,7 +68,6 @@ class StorageTest extends \snb\TestBase
     $file->open('w');
     $file->write($strings);
     $file->close();
-    $file->commit();
   }
 
   /**
@@ -104,17 +85,16 @@ class StorageTest extends \snb\TestBase
     $this->object = new Storage($def['dsn'],$def['options'],false);
 
     // create file
-    $file = $this->object->createFile($this->uri);
+    $file = $this->object->createFile($this->uri_example);
     $this->assertNotNull($file);
     $this->assertEquals('snb\file\File',get_class($file));
-
     // test writing
     $expected = 'This is test!';
     $this->fileWrite($file,$expected);
-    $this->assertLocalWritten($def['dsn'],$expected,$this->uri);
+    $this->assertLocalWritten($def['dsn'],$expected,$this->uri_example);
 
     // remove file
-    $this->object->remove($this->uri);
+    $this->object->remove($this->uri_example);
   }
 
   /**
@@ -130,20 +110,20 @@ class StorageTest extends \snb\TestBase
     $def2 = $this->dsnMap['Local2'];
     $this->object->addProvider($def2['dsn'],$def2['options']);
 
-    $file = $this->object->createFile($this->uri);
+    $file = $this->object->createFile($this->uri_example);
 
     $expected = 'This is test 2 providers!';
     $this->fileWrite($file,$expected);
 
-    $this->assertLocalWritten($def1['dsn'],$expected,$this->uri);
-    $this->assertLocalWritten($def2['dsn'],$expected,$this->uri);
+    $this->assertLocalWritten($def1['dsn'],$expected,$this->uri_example);
+    $this->assertLocalWritten($def2['dsn'],$expected,$this->uri_example);
 
     // remove file
-    $this->object->remove($this->uri);
+    $this->object->remove($this->uri_example);
 
     // assertLocalDeleted
-    $this->assertLocalDeleted($def1['dsn'],$this->uri);
-    $this->assertLocalDeleted($def2['dsn'],$this->uri);
+    $this->assertLocalDeleted($def1['dsn'],$this->uri_example);
+    $this->assertLocalDeleted($def2['dsn'],$this->uri_example);
   }
 
   /**
@@ -162,18 +142,18 @@ class StorageTest extends \snb\TestBase
     $this->object->addProvider($def2['dsn'],$def2['options']);
     $this->object->removeProvider($def2['dsn'],$def2['options']);
 
-    $file = $this->object->createFile($this->uri);
+    $file = $this->object->createFile($this->uri_example);
 
     $expected = 'This is test to remove provider!';
     $this->fileWrite($file,$expected);
 
-    $this->assertLocalWritten($def1['dsn'],$expected,$this->uri);
-    $this->assertLocalDeleted($def2['dsn'],$this->uri);
+    $this->assertLocalWritten($def1['dsn'],$expected,$this->uri_example);
+    $this->assertLocalDeleted($def2['dsn'],$this->uri_example);
 
     // remove file
-    $this->object->remove($this->uri);
+    $this->object->remove($this->uri_example);
     // assertLocalDeleted
-    $this->assertLocalDeleted($def1['dsn'],$this->uri);
+    $this->assertLocalDeleted($def1['dsn'],$this->uri_example);
   }
 
   /**
@@ -188,10 +168,10 @@ class StorageTest extends \snb\TestBase
     $path = DIR_TEST.'/fixtures/example.txt';
     $expected = file_get_contents($path);
 
-    $this->object->put($path,$this->uri,array('permittion'=>0644));
+    $this->object->put($path,$this->uri_example,array('permission'=>0644));
     
-    $this->assertLocalWritten($def1['dsn'],$expected,$this->uri);
-    $this->assertLocalWritten($def2['dsn'],$expected,$this->uri);
+    $this->assertLocalWritten($def1['dsn'],$expected,$this->uri_example);
+    $this->assertLocalWritten($def2['dsn'],$expected,$this->uri_example);
 
   }
 
@@ -209,7 +189,7 @@ class StorageTest extends \snb\TestBase
     $path = DIR_TEST.'/fixtures/example.txt';
     $expected = file_get_contents($path);
 
-    $result = $this->object->get($this->uri);
+    $result = $this->object->get($this->uri_example);
     $this->assertEquals($expected,$result);
   }
 
@@ -225,10 +205,10 @@ class StorageTest extends \snb\TestBase
     $def2 = $this->dsnMap['Local2'];
     $this->object->addProvider($def2['dsn'],$def2['options']);
     // remove file
-    $this->object->remove($this->uri);
+    $this->object->remove($this->uri_example);
     // assertLocalDeleted
-    $this->assertLocalDeleted($def1['dsn'],$this->uri);
-    $this->assertLocalDeleted($def2['dsn'],$this->uri);
+    $this->assertLocalDeleted($def1['dsn'],$this->uri_example);
+    $this->assertLocalDeleted($def2['dsn'],$this->uri_example);
   }
 
   /**
@@ -242,8 +222,8 @@ class StorageTest extends \snb\TestBase
 
     $expected = 'This is put contents test';
 
-    $this->object->putContents($this->uri,$expected,array('permission'=>0644));
-    $result = $this->object->get($this->uri);
+    $this->object->putContents($this->uri_example,$expected,array('permission'=>0644));
+    $result = $this->object->get($this->uri_example);
     $this->assertEquals($expected,$result);
   }
 
@@ -257,9 +237,9 @@ class StorageTest extends \snb\TestBase
     $def2 = $this->dsnMap['Local2'];
     $this->object->addProvider($def2['dsn'],$def2['options']);
 
-    $expected = 'This is put contents test';
+    $expected = $this->getExampleContents();
 
-    $result = $this->object->getContents($this->uri);
+    $result = $this->object->getContents($this->uri_example);
     $this->assertEquals($expected,$result);
 
     $this->testRemove();

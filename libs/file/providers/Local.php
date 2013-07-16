@@ -66,10 +66,10 @@ class Local extends \snb\file\Provider {
     $this->base_path = preg_replace('/\/$/','',$path);
     $this->options = $options;
     if(!isset($this->options['permission'])){
-      $this->options['permission'] = 644;
+      $this->options['permission'] = 0644;
     }
     if(!isset($this->options['folder_permission'])){
-      $this->options['folder_permission'] = 755;
+      $this->options['folder_permission'] = 0755;
     }
   }
   /**

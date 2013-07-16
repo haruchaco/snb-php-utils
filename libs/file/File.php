@@ -209,7 +209,7 @@ class File {
   /**
    * rollback
    */
-  public function rolback(){
+  public function rollback(){
     $this->storage->remove($this->uri,$this->options);
     if(is_null($this->previous)){
       $this->storage->remove($this->uri);

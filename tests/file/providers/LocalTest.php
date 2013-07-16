@@ -12,18 +12,6 @@ class LocalTest extends \snb\TestBase
    */
   protected $object;
   /**
-   * テスト用example.txtのURI
-   */
-  protected $uri_example;
-  /**
-   * path local
-   */
-  protected $path_example;
-  /**
-   * test file org path
-   */
-  protected $org_example;
-  /**
    * Valid DSN
    * 正常接続できるDSN
    */
@@ -36,15 +24,7 @@ class LocalTest extends \snb\TestBase
   protected function setUp()
   {
     parent::setUp();
-    $this->uri_example  = '/testdir/child/example.txt';
-    $this->org_example = DIR_TEST.'/fixtures/example.txt';
     $this->dsn = 'local://'.DIR_TEST.'/work';
-    // workフォルダにコピー
-    $this->path_example = DIR_TEST.'/work'.$this->uri_example;
-    if(!is_dir(dirname($this->path_example))){
-      mkdir(dirname($this->path_example),0777,true);
-    }
-    @copy($this->org_example,DIR_TEST.'/work'.$this->uri_example);
     // new
     $this->object = new Local;
   }
@@ -81,6 +61,7 @@ class LocalTest extends \snb\TestBase
     $options = array('permission' => 0644);
     $this->object->connect($dsn,$options);
   }
+
   /**
    * @covers snb\file\providers\Local::connect
    * @expectedException snb\file\Exception
@@ -92,6 +73,7 @@ class LocalTest extends \snb\TestBase
     $options = array('permission' => 0644);
     $this->object->connect($dsn,$options);
   }
+
   /**
    * @covers snb\file\providers\Local::connect
    * @expectedException snb\file\Exception
