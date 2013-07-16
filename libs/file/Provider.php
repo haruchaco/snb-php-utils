@@ -25,9 +25,17 @@ namespace snb\file;
  */
 abstract class Provider {
   /**
+   * @var string provider name
+   */
+  protected $provider_name = null;
+  /**
+   * @var string provider root path
+   */
+  protected $provider_root = null;
+  /**
    * @var array options
    */
-  private $options = array();
+  protected $options = array();
   /**
    * @var array prividers
    */
@@ -54,6 +62,14 @@ abstract class Provider {
     } else {
       throw new Exception('File storage provider '.$baseName.' is not found!',0);
     }
+  }
+
+  /**
+   * set DSN
+   * @param string $dsn
+   */
+  protected function perseDsn($dsn){
+    list($this->provider_name, $this->provider_root) = explode('://',$dsn);
   }
  /**
    * get driver name

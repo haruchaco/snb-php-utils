@@ -48,19 +48,19 @@ class Local extends \snb\file\Provider {
 	 * @see Provider::connect()
 	 */
 	public function connect($dsn,$options=array()){
+    $this->perseDsn($dsn);
     // check the folder permision
-    list($name,$path) = explode('://',$dsn);
-    if('local'!==strtolower($name)){
+    if('local'!==strtolower($this->provider_name)){
       throw new \snb\file\Exception('Invalid dsn strings!',
         \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
-    } else if(strlen(trim($path))==0){
+    } else if(strlen(trim($this->provider_root))==0){
       throw new \snb\file\Exception('The base path is null!',
         \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
-    } else if(!is_dir($path)){
-      throw new \snb\file\Exception('The base path is not a directory! '.$path,
+    } else if(!is_dir($this->provider_root)){
+      throw new \snb\file\Exception('The base path is not a directory! '.$this->provider_root,
         \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
     }
-    $this->base_path = preg_replace('/\/$/','',$path);
+    $this->base_path = preg_replace('/\/$/','',$this->provider_root);
     $this->options = $options;
     if(!isset($this->options['permission'])){
       $this->options['permission'] = 0644;
@@ -74,6 +74,8 @@ class Local extends \snb\file\Provider {
 	 * @see Provider::disconnect()
    */
   public function disconnect(){
+    $this->provider_name = null;
+    $this->provider_root = null;
     $this->base_path = null;
     $this->options = array();
   }

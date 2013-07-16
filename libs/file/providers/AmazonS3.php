@@ -69,16 +69,17 @@ class AmazonS3 extends \snb\file\Provider {
 	 * @see Provider::connect()
 	 */
 	public function connect($dsn,$options=array()){
+    $this->perseDsn($dsn);
     // check the folder permision
     list($name,$path) = explode('://',$dsn);
-    if('amazon_s3'!==strtolower($name)){
+    if('amazon_s3'!==strtolower($this->provider_name)){
       throw new \snb\file\Exception('Invalid dsn strings!',
         \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
-    } else if(strlen(trim($path))==0){
+    } else if(strlen(trim($this->provider_root))==0){
       throw new \snb\file\Exception('The bucket name is null!',
         \snb\file\Exception::ERROR_PROVIDER_CONNECTION);
     }
-    list($this->region,$this->bucket_name) = explode('/',$path);
+    list($this->region,$this->bucket_name) = explode('/',$this->provider_root);
     $this->options = $options;
     // region
     $region = constant('\AmazonS3::'.$this->region);
@@ -92,6 +93,8 @@ class AmazonS3 extends \snb\file\Provider {
 	 * @see Provider::disconnect()
    */
   public function disconnect(){
+    $this->provider_name = null;
+    $this->provider_root = null;
     $this->region = null;
     $this->bucket_name = null;
     $this->s3 = null;
