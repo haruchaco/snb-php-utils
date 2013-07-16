@@ -68,6 +68,7 @@ class StorageTest extends \snb\TestBase
     $file->open('w');
     $file->write($strings);
     $file->close();
+    $file->commit();
   }
 
   /**
@@ -247,25 +248,61 @@ class StorageTest extends \snb\TestBase
 
   /**
    * @covers snb\file\Storage::commit
-   * @todo   Implement testCommit().
+   * @covers snb\file\File::commit
    */
   public function testCommit()
   {
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
+    $expected = $this->getExampleContents();
+    $def = $this->dsnMap['Local'];
+    $this->object = new Storage($def['dsn'],$def['options'],false);
+    // file 1
+    $path1 = $this->getLocalPathUsingUri($def['dsn'],$this->uri_example);
+    if(file_exists($path1)){ @unlink($path1); }
+    $file1 = $this->object->createFile($this->uri_example);
+    $file1->putContents($expected);
+    $this->assertFalse(file_exists($path1));
+    // file 2
+    $uri = '/test2/tmp.txt';
+    $path2 = $this->getLocalPathUsingUri($def['dsn'],$uri);
+    if(file_exists($path2)){ @unlink($path2); }
+    $file2 = $this->object->createFile($uri);
+    $file2->putContents($expected);
+    $this->assertFalse(file_exists($path2));
+    // commit
+    $this->object->commit();
+    $this->assertTrue(file_exists($path1));
+    $this->assertTrue(file_exists($path2));
+    $this->assertEquals($expected,file_get_contents($path1));
+    $this->assertEquals($expected,file_get_contents($path2));
+
   }
 
   /**
    * @covers snb\file\Storage::rollback
-   * @todo   Implement testRolback().
+   * @covers snb\file\File::rollback
    */
   public function testRollback()
   {
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
+    $expected = $this->getExampleContents();
+    $def = $this->dsnMap['Local'];
+    $this->object = new Storage($def['dsn'],$def['options'],false);
+    // file 1
+    $path1 = $this->getLocalPathUsingUri($def['dsn'],$this->uri_example);
+    if(file_exists($path1)){ @unlink($path1); }
+    $file1 = $this->object->createFile($this->uri_example);
+    $file1->putContents($expected);
+    $this->assertFalse(file_exists($path1));
+    // file 2
+    $uri = '/test2/tmp.txt';
+    $path2 = $this->getLocalPathUsingUri($def['dsn'],$uri);
+    if(file_exists($path2)){ @unlink($path2); }
+    $file2 = $this->object->createFile($uri);
+    $file2->putContents($expected);
+    $this->assertFalse(file_exists($path2));
+    // commit
+    $this->object->rollback();
+    $this->assertFalse(file_exists($path1));
+    $this->assertFalse(file_exists($path2));
+
   }
 }

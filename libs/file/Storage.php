@@ -56,7 +56,10 @@ class Storage {
    * @param array $options
    * @param boolean $autoCommint
    */
-  public function createFile($uri,array $options=array(),$autoCommit=true){
+  public function createFile($uri,array $options=array(),$autoCommit=null){
+    if(!is_bool($autoCommit)){
+      $autoCommit = $this->auto_commit;
+    }
     if(!isset($this->files[$uri])){
       $options = array_merge($this->options,$options);
       $this->files[$uri] = new File($this,$uri,$options,$autoCommit);
