@@ -22,7 +22,7 @@ require_once dirname(dirname(__FILE__)).'/Exception.php';
  *   'permission' => 0644
  *   'folder_permission' => 0755
  * );
- * $file = snb\storage\Storage.createFile('example.txt',$options); 
+ * $file = snb\Storage.createFile('example.txt',$options); 
  * $file->open('w');
  * $file->write("foo\nvar");
  * $file->close();

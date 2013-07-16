@@ -41,7 +41,7 @@ class FileTest extends \snb\TestBase
     $this->dsn = 'local://'.DIR_TEST.'/work';
     $this->options = array('permission'=>0666);
     $this->uri = 'tmp.txt';
-    $this->storage = new Storage($this->dsn);
+    $this->storage = new \snb\Storage($this->dsn);
     $this->object = $this->storage->createFile($this->uri,$this->options);
   }
 
@@ -85,11 +85,13 @@ class FileTest extends \snb\TestBase
    * @covers snb\storage\File::isOpened
    * @covers snb\storage\File::close
    * @covers snb\storage\File::getContents
+   * @covers snb\storage\File::commit
+   * @covers snb\storage\File::clean
    */
   public function testWriteWithoutTransaction()
   {
     // create new storage without transaction
-    $this->storage = new Storage($this->dsn,$this->options,true);
+    $this->storage = new \snb\Storage($this->dsn,$this->options,true);
     $this->object = $this->storage->createFile($this->uri,$this->options,true);
     // none transaxtion
     $expected = $this->test_string;
@@ -164,9 +166,10 @@ class FileTest extends \snb\TestBase
    * @covers snb\storage\File::checkOpen
    * @covers snb\storage\File::close
    * @covers snb\storage\File::commit
+   * @covers snb\storage\File::clean
+   * @covers snb\storage\File::initialize
    * @covers snb\storage\Storage::commit
    * @covers snb\storage\File::remove
-   * @covers snb\storage\File::clean
    * @covers snb\storage\File::getContents
    */
   public function testWriteWithTransaction()
@@ -174,7 +177,7 @@ class FileTest extends \snb\TestBase
     // remove first
     $this->object->remove();
     // create new storage without transaction
-    $this->storage = new Storage($this->dsn,$this->options,false);
+    $this->storage = new \snb\Storage($this->dsn,$this->options,false);
     $this->object = $this->storage->createFile($this->uri,$this->options,false);
     // none transaxtion
     $expected = $this->test_string;
@@ -189,6 +192,8 @@ class FileTest extends \snb\TestBase
     // get contents
     $result = $this->object->getContents();
     $this->assertEquals($expected,$result);
+    // remove finaly
+    $this->object->remove();
 
   }
  
@@ -197,6 +202,7 @@ class FileTest extends \snb\TestBase
    * @covers snb\storage\Storage::rollback
    * @covers snb\storage\File::initialize
    * @covers snb\storage\File::clean
+   * @covers snb\storage\File::remove
    * @covers snb\storage\File::isOpened
    * @covers snb\storage\File::checkOpen
    */
@@ -205,7 +211,7 @@ class FileTest extends \snb\TestBase
     // remove first
     $this->object->remove();
     // create new storage without transaction
-    $this->storage = new Storage($this->dsn,$this->options,false);
+    $this->storage = new \snb\Storage($this->dsn,$this->options,false);
     $this->object = $this->storage->createFile($this->uri,$this->options,false);
     // none transaxtion
     $expected = $this->test_string;
@@ -220,10 +226,6 @@ class FileTest extends \snb\TestBase
 
   /**
    * @covers snb\storage\File::import
-   * @covers snb\storage\File::commit
-   * @covers snb\storage\Storage::commit
-   * @covers snb\storage\File::initialize
-   * @covers snb\storage\File::clean
    */
   public function testImport()
   {
@@ -234,10 +236,6 @@ class FileTest extends \snb\TestBase
 
   /**
    * @covers snb\storage\File::putContents
-   * @covers snb\storage\File::commit
-   * @covers snb\storage\Storage::commit
-   * @covers snb\storage\File::initialize
-   * @covers snb\storage\File::clean
    */
   public function testPutContents()
   {

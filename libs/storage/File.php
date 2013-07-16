@@ -8,7 +8,7 @@
  */
 
 namespace snb\storage;
-require_once(dirname(__FILE__).'/Storage.php');
+require_once(dirname(dirname(__FILE__)).'/Storage.php');
 require_once(dirname(__FILE__).'/Exception.php');
 
 /**
@@ -75,7 +75,7 @@ class File {
    * @param array $options 保存先オプション情報
    * @param boolean $autoCommit
    */
-  public function __construct(Storage $storage,$uri,array $options=array(),$autoCommit=true){
+  public function __construct(\snb\Storage $storage,$uri,array $options=array(),$autoCommit=true){
     $this->storage = $storage;
     $this->uri = $uri;
     $this->options = $options;

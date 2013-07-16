@@ -7,10 +7,10 @@
  * <http://github.com/haruchaco>
  */
 
-namespace snb\storage;
-require_once(dirname(__FILE__).'/Exception.php');
-require_once(dirname(__FILE__).'/File.php');
-require_once(dirname(__FILE__).'/Provider.php');
+namespace snb;
+require_once(dirname(__FILE__).'/storage/Exception.php');
+require_once(dirname(__FILE__).'/storage/File.php');
+require_once(dirname(__FILE__).'/storage/Provider.php');
 /**
  * Storage class.
  * 
@@ -62,7 +62,7 @@ class Storage {
     }
     if(!isset($this->files[$uri])){
       $options = array_merge($this->options,$options);
-      $this->files[$uri] = new File($this,$uri,$options,$autoCommit);
+      $this->files[$uri] = new storage\File($this,$uri,$options,$autoCommit);
     }
     $obj = & $this->files[$uri];
     return $obj;
@@ -95,11 +95,11 @@ class Storage {
     foreach($this->dsn_map as $dsn => $defaultOptions){
       $options = array_merge($defaultOptions,$options);
       try{
-        $provider = Provider::getInstance($dsn,$options);
+        $provider = storage\Provider::getInstance($dsn,$options);
         $provider->put($path,$uri);
-      } catch(Exception $e){
+      } catch(storage\Exception $e){
         $this->remove($uri);
-        throw new Exception('Commit failed! '.$dsn,0,$e);
+        throw new storage\Exception('Commit failed! '.$dsn,0,$e);
       }
     }
   }
@@ -112,14 +112,14 @@ class Storage {
     $exceptions = array();
     foreach($this->dsn_map as $dsn => $options){
       try{
-        $provider = Provider::getInstance($dsn,$options);
+        $provider = storage\Provider::getInstance($dsn,$options);
         return $provider->get($uri,$path);
-      } catch(Exception $e){
+      } catch(storage\Exception $e){
         $exceptions[] = $e;
       }
     }
     if(count($exceptions)>0){
-      throw new Exception('Fail to get file! '.$uri,0,null,$exceptions);
+      throw new storage\Exception('Fail to get file! '.$uri,0,null,$exceptions);
     }
   }
   /**
@@ -130,9 +130,9 @@ class Storage {
     $messages = '';
     foreach($this->dsn_map as $dsn => $options){
       try{
-        $provider = Provider::getInstance($dsn,$options);
+        $provider = storage\Provider::getInstance($dsn,$options);
         $provider->remove($uri);
-      } catch(Exception $e){
+      } catch(storage\Exception $e){
         $messages .= ':'.$e->getCode().' '.$e->getMessage();
       }
     }
