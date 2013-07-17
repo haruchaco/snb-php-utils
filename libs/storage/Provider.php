@@ -119,4 +119,47 @@ abstract class Provider {
 	 * @param boolean $recursive
 	 */
 	abstract public function remove($dstUri,$recursive=false);
+
+  /**
+   * encode binary file for saving as text
+   * @param string $path
+   * @return string base64 encoded
+   */
+  protected function encode($path,$to){
+    $fp = fopen($path,'r');
+    $fw = fopen($to,'w');
+    if($fw && $fp){
+      flock($fw,LOCK_EX);
+      while(!feof($fp)){
+        $bin = fread($fp,240000);
+        $str = base64_encode($bin);
+        fwrite($fw,$str);
+      }
+      flock($fw,LOCK_UN);
+      fclose($fp);
+      fclose($rw);
+    } else {
+      throw new Exception('File storage provider fail to open file!',0);
+    }
+  }
+  /**
+   * decode encoded strings 
+   */
+  protected function decode($path,$to){
+    $fp = fopen($path,'r');
+    $fw = fopen($to,'w');
+    if($fw && $fp){
+      flock($fw,LOCK_EX);
+      while(!feof($fp)){
+        $bin = fread($fp,240000);
+        $str = base64_decode($bin);
+        fwrite($fw,$str);
+      }
+      flock($fw,LOCK_UN);
+      fclose($fp);
+      fclose($rw);
+    } else {
+      throw new Exception('File storage provider fail to open file!',0);
+    }
+  }
 }
