@@ -79,9 +79,10 @@ class Mysql extends \snb\storage\Provider {
     if(strpos($masterHost,':')!==false){
       list($masterHost,$port) = explode(':',$masterHost);
     }
+    $this->parseUriParams($param);
     if(isset($this->options['pdo'])){
       if(is_array($this->options['pdo'])){
-        $this->connections = array_merge($this->commections,$this->options['pdo']);
+        $this->connections = array_merge($this->connections,$this->options['pdo']);
       } else {
         $this->connections[0] = $this->options['pdo'];
       }
@@ -90,7 +91,29 @@ class Mysql extends \snb\storage\Provider {
       $this->connections[0] = new \PDO( $dsn, $options['user'], $options['pass'], array(\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8') );
       $this->connections[0]->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
       $this->connections[0]->setAttribute(\PDO::ATTR_TIMEOUT, (defined('MYSQL_TIMEOUT') ? MYSQL_TIMEOUT : 5));
-//      $this->connections[0]->query('SET time_zone=\'Asia/Tokyo\'');
+    }
+  }
+  /**
+   * parse uri parameters
+   * @param string parameter strings form encoded
+   */
+  private function parseUriParams($param){
+    if(!is_null($param)){
+      $elms = explode('&',$param);
+      $map = array();
+      foreach($elms as $elm){
+        if(strpos($elm,'=')!==false){
+          $mp = explode('=',$elm);
+          $key = array_shift($mp);
+          $map[$key] = implode('=',$mp);
+        }
+      }
+      if(isset($map['uri']) && strlen($map['uri'])>0){
+        $this->field_uri = $map['uri'];
+      }
+      if(isset($map['contents']) && strlen($map['contents'])>0){
+        $this->field_contents = $map['contents'];
+      }
     }
   }
   /**

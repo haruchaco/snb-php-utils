@@ -138,21 +138,7 @@ abstract class Provider {
    * @param string $to
    */
   public function encode($path,$to){
-    $fp = fopen($path,'r');
-    $fw = fopen($to,'w');
-    if($fw && $fp){
-      flock($fw,LOCK_EX);
-      while(!feof($fp)){
-        $bin = fread($fp,240000);
-        $str = base64_encode($bin);
-        fwrite($fw,$str);
-      }
-      flock($fw,LOCK_UN);
-      fclose($fp);
-      fclose($fw);
-    } else {
-      throw new Exception('File storage provider fail to open file!',0);
-    }
+    $this->base64($path,$to,true);
   }
   /**
    * decode encoded strings 
@@ -160,13 +146,24 @@ abstract class Provider {
    * @param string $to
    */
   public function decode($path,$to){
+    $this->base64($path,$to,false);
+  }
+  /**
+   * base64
+   */
+  private function base64($path,$to,$encode=true){
     $fp = fopen($path,'r');
     $fw = fopen($to,'w');
     if($fw && $fp){
       flock($fw,LOCK_EX);
       while(!feof($fp)){
         $bin = fread($fp,240000);
-        $str = base64_decode($bin);
+        $str = null;
+        if($encode){
+          $str = base64_encode($bin);
+        } else {
+          $str = base64_decode($bin);
+        }
         fwrite($fw,$str);
       }
       flock($fw,LOCK_UN);

@@ -87,6 +87,7 @@ class ProviderTest extends \snb\TestBase
   /**
    * @covers snb\storage\Provider::encode
    * @covers snb\storage\Provider::decode
+   * @covers snb\storage\Provider::base64
    */
   public function testEncode(){
     $expected = $this->example_text;

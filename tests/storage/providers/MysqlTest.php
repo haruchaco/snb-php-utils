@@ -47,28 +47,36 @@ class MysqlTest extends \snb\TestBase
   /**
    * @covers snb\storage\providers\Mysql::__construct
    * @covers snb\storage\providers\Mysql::connect
-   * @todo   Implement testConnect().
+   * @covers snb\storage\providers\Mysql::parseUriParams
+   * @covers snb\storage\providers\Mysql::disconnect
    */
   public function testConnect()
   {
+    // simple
     $this->object->connect($this->dsn,$this->options);
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
-  }
-
-  /**
-   * @covers snb\storage\providers\Mysql::disconnect
-   * @todo   Implement testDisconnect().
-   */
-  public function testDisconnect()
-  {
     $this->object->disconnect();
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
+    // with port
+    $dsn = 'mysql://localhost:3306/test/m_files';
+    $this->object->connect($dsn,$this->options);
+    $this->object->disconnect();
+    // with params
+    $dsn = 'mysql://localhost:3306/test/m_files?uri=uri&contents=contents';
+    $this->object->connect($dsn,$this->options);
+    $this->object->disconnect();
+    // with pdo
+		$pdodsn = 'mysql:dbname=test;host=localhost;port=3306';
+    $pdo = new \PDO( $pdodsn, 'root', '', array(\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8') );
+    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
+    $pdo->setAttribute(\PDO::ATTR_TIMEOUT, (defined('MYSQL_TIMEOUT') ? MYSQL_TIMEOUT : 5));
+    $this->options['pdo'] = $pdo;
+    $this->object->connect($dsn,$this->options);
+    $this->object->disconnect();
+    // with pdo array
+    $this->options['pdo'] = array($pdo,$pdo);
+    $this->object->connect($dsn,$this->options);
+    $this->object->disconnect();
+
+
   }
 
   /**
@@ -79,10 +87,6 @@ class MysqlTest extends \snb\TestBase
   {
     $this->object->connect($this->dsn,$this->options);
     $this->object->put($this->org_example,'/tmp.txt',array());
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
   }
 
   /**
@@ -92,8 +96,17 @@ class MysqlTest extends \snb\TestBase
   public function testGet()
   {
     $this->object->connect($this->dsn,$this->options);
+    // get contents
     $contents = $this->object->get('/tmp.txt');
     $this->assertEquals(file_get_contents($this->org_example),$contents);
+    // to file
+    $tmp = tempnam(sys_get_temp_dir(),'tmp_snb_storage_mysql_test_');
+    $result = $this->object->get('/tmp.txt',$tmp);
+    $this->assertTrue($result);
+    $this->assertEquals(file_get_contents($this->org_example),file_get_contents($tmp));
+
+    // disconnect
+    $this->object->disconnect();
   }
 
 }
