@@ -121,11 +121,23 @@ abstract class Provider {
 	abstract public function remove($dstUri,$recursive=false);
 
   /**
+   * format uri
+   * @param string $uri
+   * @return string formated uri
+   */
+  public function formatUri($uri){
+    if(strpos($uri,'/')===false){
+      return '/'.$uri;
+    }
+    return $uri;
+  }
+
+  /**
    * encode binary file for saving as text
    * @param string $path
-   * @return string base64 encoded
+   * @param string $to
    */
-  protected function encode($path,$to){
+  public function encode($path,$to){
     $fp = fopen($path,'r');
     $fw = fopen($to,'w');
     if($fw && $fp){
@@ -137,15 +149,17 @@ abstract class Provider {
       }
       flock($fw,LOCK_UN);
       fclose($fp);
-      fclose($rw);
+      fclose($fw);
     } else {
       throw new Exception('File storage provider fail to open file!',0);
     }
   }
   /**
    * decode encoded strings 
+   * @param string $path
+   * @param string $to
    */
-  protected function decode($path,$to){
+  public function decode($path,$to){
     $fp = fopen($path,'r');
     $fw = fopen($to,'w');
     if($fw && $fp){
@@ -157,7 +171,7 @@ abstract class Provider {
       }
       flock($fw,LOCK_UN);
       fclose($fp);
-      fclose($rw);
+      fclose($fw);
     } else {
       throw new Exception('File storage provider fail to open file!',0);
     }

@@ -79,11 +79,19 @@ class Mysql extends \snb\storage\Provider {
     if(strpos($masterHost,':')!==false){
       list($masterHost,$port) = explode(':',$masterHost);
     }
-		$dsn = 'mysql:dbname='.$this->database.';host='.$masterHost.';port='.$port;
-		$this->connections[0] = new \PDO( $dsn, $options['user'], $options['pass'], array(\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8') );
-    $this->connections[0]->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
-    $this->connections[0]->setAttribute(\PDO::ATTR_TIMEOUT, (defined('MYSQL_TIMEOUT') ? MYSQL_TIMEOUT : 5));
-    //$this->connections[0]->query('SET time_zone=\''.MYSQL_TIME_ZONE.'\'');
+    if(isset($this->options['pdo'])){
+      if(is_array($this->options['pdo'])){
+        $this->connections = array_merge($this->commections,$this->options['pdo']);
+      } else {
+        $this->connections[0] = $this->options['pdo'];
+      }
+    } else {
+		  $dsn = 'mysql:dbname='.$this->database.';host='.$masterHost.';port='.$port;
+      $this->connections[0] = new \PDO( $dsn, $options['user'], $options['pass'], array(\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8') );
+      $this->connections[0]->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
+      $this->connections[0]->setAttribute(\PDO::ATTR_TIMEOUT, (defined('MYSQL_TIMEOUT') ? MYSQL_TIMEOUT : 5));
+//      $this->connections[0]->query('SET time_zone=\'Asia/Tokyo\'');
+    }
   }
   /**
    * disconnect and reset this object verialbles.
@@ -102,13 +110,29 @@ class Mysql extends \snb\storage\Provider {
    * get contents from uri
    */
   public function get($uri,$path=null){
-    $sql = sprintf('SELECT %s FROM %s WHERE %s=:uri',$this->field_contents,$this->table,$this->field_uri);
+    $uri = $this->formatUri($uri);
     $pdo = $this->connections[array_rand($this->connections)];
+    $sql = sprintf('SELECT %s FROM %s WHERE %s=:uri',$this->field_contents,$this->table,$this->field_uri);
     $statement = $pdo->prepare($sql);
     $statement->bindValue(':uri',$uri,\PDO::PARAM_STR);
-    $statement->exexute();
+    $statement->execute();
 		$result = $statement->fetch(\PDO::FETCH_ASSOC);
-print_r($result);
+    $tmp = tempnam(sys_get_temp_dir(),'tmp_snb_storage_mysql_');
+    if(file_put_contents($tmp,$result['contents'])){
+      if(is_null($path)){
+        $decodedPath = tempnam(sys_get_temp_dir(),'tmp_snb_storage_mysql_');
+        $this->decode($tmp,$decodedPath);
+        $ret = file_get_contents($decodedPath);
+        @unlink($tmp);
+        @unlink($decodedPath);
+        return $ret;
+      } else {
+        $this->decode($tmp,$path);
+        @unlink($tmp);
+        return true;
+      }
+    }
+    throw new Exception('File storage provider mysql: fail to open temporary file!'.$tmp,0);
   }
 	/**
 	 * put file
@@ -117,6 +141,17 @@ print_r($result);
    * @param array $options
 	 */
 	public function put($srcPath,$dstUri,$options=array()){
+    $dstUri = $this->formatUri($dstUri);
+    $pdo = $this->connections[0];
+    $this->remove($dstUri);
+    $tmp = tempnam(sys_get_temp_dir(),'tmp_snb_storage_mysql_');
+    $this->encode($srcPath,$tmp);
+    $contents = file_get_contents($tmp);
+    $sql = sprintf('INSERT INTO %s (%s,%s)VALUES(:uri,:contents)',$this->table,$this->field_uri,$this->field_contents);
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':uri',$dstUri,\PDO::PARAM_STR);
+    $statement->bindValue(':contents',$contents,\PDO::PARAM_STR);
+    $statement->execute();
   }
 	/**
 	 * remove file or folder
@@ -124,5 +159,11 @@ print_r($result);
 	 * @param boolean $recursive
 	 */
 	public function remove($dstUri,$recursive=false){
+    $dstUri = $this->formatUri($dstUri);
+    $pdo = $this->connections[0];
+    $sql = sprintf('DELETE FROM %s WHERE %s=:uri',$this->table,$this->field_uri);
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':uri',$dstUri,\PDO::PARAM_STR);
+    $statement->execute();
   }
 }

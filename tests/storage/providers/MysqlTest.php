@@ -45,13 +45,13 @@ class MysqlTest extends \snb\TestBase
   }
 
   /**
+   * @covers snb\storage\providers\Mysql::__construct
    * @covers snb\storage\providers\Mysql::connect
    * @todo   Implement testConnect().
    */
   public function testConnect()
   {
     $this->object->connect($this->dsn,$this->options);
-print_r($this->object);
     // Remove the following lines when you implement this test.
     $this->markTestIncomplete(
       'This test has not been implemented yet.'
@@ -64,18 +64,7 @@ print_r($this->object);
    */
   public function testDisconnect()
   {
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
-  }
-
-  /**
-   * @covers snb\storage\providers\Mysql::get
-   * @todo   Implement testGet().
-   */
-  public function testGet()
-  {
+    $this->object->disconnect();
     // Remove the following lines when you implement this test.
     $this->markTestIncomplete(
       'This test has not been implemented yet.'
@@ -84,10 +73,12 @@ print_r($this->object);
 
   /**
    * @covers snb\storage\providers\Mysql::put
-   * @todo   Implement testPut().
+   * @covers snb\storage\providers\Mysql::remove
    */
   public function testPut()
   {
+    $this->object->connect($this->dsn,$this->options);
+    $this->object->put($this->org_example,'/tmp.txt',array());
     // Remove the following lines when you implement this test.
     $this->markTestIncomplete(
       'This test has not been implemented yet.'
@@ -95,14 +86,14 @@ print_r($this->object);
   }
 
   /**
-   * @covers snb\storage\providers\Mysql::remove
-   * @todo   Implement testRemove().
+   * @covers snb\storage\providers\Mysql::get
+   * @depends testPut
    */
-  public function testRemove()
+  public function testGet()
   {
-    // Remove the following lines when you implement this test.
-    $this->markTestIncomplete(
-      'This test has not been implemented yet.'
-    );
+    $this->object->connect($this->dsn,$this->options);
+    $contents = $this->object->get('/tmp.txt');
+    $this->assertEquals(file_get_contents($this->org_example),$contents);
   }
+
 }
