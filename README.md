@@ -93,6 +93,7 @@ Options
 
 DSN
     mysql://[host]:[port]/[database]/[table]
+
     mysql://[host]:[port]/[database]/[table]?uri=[field for uri]&contents=[field for contents]
 
 
