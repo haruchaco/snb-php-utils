@@ -61,12 +61,12 @@ simple transaction support.
 ### Supported storage
 
 * Amazon S3 (require AWS SDK files)
+* Mysql
 * Local file system
 
 ### I'll develop followings.
 
 * Dropbox (ver. 0.2)
-* MySQL (ver 0.2)
 * Google Drive (ver 0.3)
 * Memcache (ver 0.3)
 * Redis
@@ -88,6 +88,12 @@ Options
 * acl      ... acl. see the aws php sdk.
 * contentType ... content-type
 
+
+#### Mysql
+
+DSN
+    mysql://[host]:[port]/[database]/[table]
+    mysql://[host]:[port]/[database]/[table]?uri=[field for uri]&contents=[field for contents]
 
 
 
