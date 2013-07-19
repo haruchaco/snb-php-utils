@@ -155,7 +155,7 @@ class Mysql extends \snb\storage\Provider {
         return true;
       }
     }
-    throw new Exception('File storage provider mysql: fail to open temporary file!'.$tmp,0);
+    throw new \snb\storage\Exception('File storage provider mysql: fail to open temporary file!'.$tmp,0);
   }
 	/**
 	 * put file
@@ -170,11 +170,17 @@ class Mysql extends \snb\storage\Provider {
     $tmp = tempnam(sys_get_temp_dir(),'tmp_snb_storage_mysql_');
     $this->encode($srcPath,$tmp);
     $contents = file_get_contents($tmp);
-    $sql = sprintf('INSERT INTO %s (%s,%s)VALUES(:uri,:contents)',$this->table,$this->field_uri,$this->field_contents);
-    $statement = $pdo->prepare($sql);
-    $statement->bindValue(':uri',$dstUri,\PDO::PARAM_STR);
-    $statement->bindValue(':contents',$contents,\PDO::PARAM_STR);
-    $statement->execute();
+    try {
+      $sql = sprintf('INSERT INTO %s (%s,%s)VALUES(:uri,:contents)',$this->table,$this->field_uri,$this->field_contents);
+      $statement = $pdo->prepare($sql);
+      $statement->bindValue(':uri',$dstUri,\PDO::PARAM_STR);
+      $statement->bindValue(':contents',$contents,\PDO::PARAM_STR);
+      $statement->execute();
+      @unlink($tmp);
+    } catch(\Exception $e){
+      @unlink($tmp);
+      throw new \snb\storage\Exception('File provider mysql: fail to select file!',0,$e);
+    }
   }
 	/**
 	 * remove file or folder

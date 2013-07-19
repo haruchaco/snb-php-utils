@@ -14,6 +14,24 @@ You can transfer and read, write files like local files only simple configuratio
 
 snb\\Storageはローカルファイルを扱い様な感覚で様々なストレージサービスにファイルを保存するライブラリです。
 
+#### Supported storage
+
+* Amazon S3 (require AWS SDK files)
+* Mysql
+* Local file system
+
+#### I'll develop followings.
+
+* HTTP POST/PUT/DELETE
+* Amazon Glacier (planed ver 0.2)
+* SCP (planed ver 0.2)
+* Memcache (ver 0.3)
+* Dropbox (ver. 0.3)
+* Google Drive (ver 0.3)
+* Redis
+
+#### Usage
+
 eg.
 
     $storage = new snb\Storage($dsn,$options);
@@ -58,27 +76,12 @@ simple transaction support.
     }
     
 
-### Supported storage
+### Amazon S3
 
-* Amazon S3 (require AWS SDK files)
-* Mysql
-* Local file system
-
-### I'll develop followings.
-
-* Dropbox (ver. 0.2)
-* Google Drive (ver 0.3)
-* Memcache (ver 0.3)
-* Redis
-* SCP
-* HTTP POST/PUT/DELETE
-
-#### Amazon S3
-
-DSN
+#### DSN
     amazon_s3://[your aws region]/[your bucket name]
 
-Options
+#### Initialize Options
 
 * key    ... Amazon Web Services Key.
 * secret ... Amazon Web Services Secret.
@@ -88,10 +91,14 @@ Options
 * acl      ... acl. see the aws php sdk.
 * contentType ... content-type
 
+#### File upload options
 
-#### Mysql
 
-DSN
+
+### Mysql
+
+#### DSN
+
     mysql://[host]:[port]/[database]/[table]
 
     mysql://[host]:[port]/[database]/[table]?uri=[field for uri]&contents=[field for contents]

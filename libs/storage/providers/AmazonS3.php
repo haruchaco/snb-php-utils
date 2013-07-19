@@ -100,7 +100,7 @@ class AmazonS3 extends \snb\storage\Provider {
   public function get($uri,$path=null){
     $uri = $this->_formatUri($uri);
     $localPath = (!is_null($path) ) ?
-      $path :tempnam(sys_get_temp_dir(),'sbn_aws_s3_tmp_');
+      $path :tempnam(sys_get_temp_dir(),'snb_aws_s3_tmp_');
 		$response = $this->s3->get_object(
       $this->bucket_name,
       $uri,
@@ -113,7 +113,9 @@ class AmazonS3 extends \snb\storage\Provider {
       } else {
         return true;
       }
-		}
+		} else if(file_exists($path)){
+      @unlink($path);
+    }
     throw new \snb\storage\Exception('Fail to download from amazon s3!',
       \snb\storage\Exception::ERROR_PROVIDER_CONNECTION);
   }
