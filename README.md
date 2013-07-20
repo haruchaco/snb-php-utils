@@ -12,28 +12,24 @@ snb-php-utils is imple utilities for php 5.
 snb\\Storage is an uploading utility class to online or offline storage services.
 You can transfer and read, write files like local files only simple configurations.
 
+
 snb\\Storageはローカルファイルを扱い様な感覚で様々なストレージサービスにファイルを保存するライブラリです。
+簡単な設定だけで同時に複数のストレージにファイルをアップロードすることもできます
 
 #### Supported storage
 
+* Local file system
 * Amazon S3 (require AWS SDK files)
 * Mysql
-* Local file system
-
-#### I'll develop followings.
-
-* HTTP POST/PUT/DELETE
-* Amazon Glacier (planed ver 0.2)
-* SCP (planed ver 0.2)
-* Memcache (ver 0.3)
-* Dropbox (ver. 0.3)
-* Google Drive (ver 0.3)
-* Redis
 
 #### Usage
 
-eg.
+You can read and write as local file.
 
+ローカルファイルを扱うように読み書きできます。
+
+    $dsn = 'local:///home/hoge/storage';
+    $options = array('permission'=>0644,'permission_folder'=>0755)
     $storage = new snb\Storage($dsn,$options);
     
     // you can open and write,
@@ -60,8 +56,19 @@ eg.
     $file = $storage->createFile('/foo/me.txt');
     $file->putContents("My name is Masanori Nakashima.\n");
 
-simple transaction support.
+#### simple transaction support.
 
+You can upload after all tasks are success.
+but this transaction don't support exclusive.
+
+すべてのタスクが完了してからアップロードを確定するシンプルなトランザクション機能があります。
+ただしこのトランザクションは現在は排他ロックをサポートしていません。
+
+    $dsn = 'amazon_aws://TOKYO/my_bucket';
+    $options = array(
+			'acl'      => AmazonS3::ACL_PUBLIC,
+			'curlopts' => array(CURLOPT_SSL_VERIFYPEER => false)
+    );
     $storage = new snb\Storage($dsn,$options,false);
     try {
       $file1 = $storage->createFile('/foo/me.txt');
@@ -75,13 +82,34 @@ simple transaction support.
       $storage->rollback();
     }
     
+#### support upload some storages at once.
 
-### Amazon S3
+You can upload to some storage at once,
+do followings.
 
-#### DSN
+複数のオンラインストレージに同時に同じファイルをアップロードすることができます。
+
+    // create new instance
+    $dsn = 'local:///home/hoge/storage';
+    $options = array('permission'=>0644,'permission_folder'=>0755)
+    $storage = new snb\Storage($dsn,$options);
+    // add a provider
+    $dsn = 'amazon_aws://TOKYO/my_bucket';
+    $options = array(
+			'acl'      => AmazonS3::ACL_PUBLIC,
+			'curlopts' => array(CURLOPT_SSL_VERIFYPEER => false)
+    );
+    $storage->addProvider($dsn,$options);
+    // put contents
+    $storage->putContents('/my/foo.txt', 'This is test contents!');
+
+## Amazon S3
+
+### DSN
+
     amazon_s3://[your aws region]/[your bucket name]
 
-#### Initialize Options
+### Initialize Options
 
 * key    ... Amazon Web Services Key.
 * secret ... Amazon Web Services Secret.
@@ -91,17 +119,44 @@ simple transaction support.
 * acl      ... acl. see the aws php sdk.
 * contentType ... content-type
 
-#### File upload options
+### File upload options
 
+You can use all options of AWS SDK Amazon S3 file options.
+see the AWS PHP SDK.
 
+## Mysql
 
-### Mysql
-
-#### DSN
+### DSN
 
     mysql://[host]:[port]/[database]/[table]
+    mysql://[host]:[port]/[database]/[table]?uri=[field name for uri]&contents=[field name for contents]
 
-    mysql://[host]:[port]/[database]/[table]?uri=[field for uri]&contents=[field for contents]
+### Initialize options
 
+* user  ... mysql connect user
+* pass  ... mysql connect password
 
+# How to develop a provider plugin
+
+You can develop anothe storage provider plugin, only extends from snb\storage\Provider class.
+
+for example,
+
+    class GoogleDrive extends \snb\storage\Provider {
+      public function connect($dsn,$options=array()){
+        $this->perveDsn();
+        // ... something to do for connection
+      }
+      public function get($uri,$pathto=null){
+        // something to do,
+        // but if $pathto is not null, you should save the file to the path
+        // after getting the file from the uri.
+      }
+      public function put($path,$to,$options=array()){
+        // something to do,
+      }
+      public function remove($uri){
+        // something to do,
+      }
+    }
 
