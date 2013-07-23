@@ -1,19 +1,20 @@
-snb-php-utils
+mychaelstyle/php-utils
 =============
 
-snb-php-utils is imple utilities for php 5.  
+mychaelstyle/php-utils is imple utilities for php 5.  
 
 # Outline
 
-1. snb\\Storage version 0.1.0 ... easy access to online storages.
+1. mychaelstyle\\Storage version 0.1.0 ... easy access to online storages.
+2. mychaelstyle\\queue\\Factory  version 0.1.0 ... easy access to online storages.
 
-# snb\\Storage
+# mychaelstyle\\Storage
 
-snb\\Storage is an uploading utility class to online or offline storage services.
+mychaelstyle\\Storage is an uploading utility class to online or offline storage services.
 You can transfer and read, write files like local files only simple configurations.
 
 
-snb\\Storageはローカルファイルを扱い様な感覚で様々なストレージサービスにファイルを保存するライブラリです。
+mychaelstyle\\Storageはローカルファイルを扱い様な感覚で様々なストレージサービスにファイルを保存するライブラリです。
 簡単な設定だけで同時に複数のストレージにファイルをアップロードすることもできます
 
 #### Supported storage
@@ -30,12 +31,12 @@ You can read and write as local file.
 
     $dsn = 'local:///home/hoge/storage';
     $options = array('permission'=>0644,'permission_folder'=>0755)
-    $storage = new snb\Storage($dsn,$options);
+    $storage = new mychaelstyle\Storage($dsn,$options);
     
     // you can open and write,
     $file = $storage->createFile('/foo/var.txt');
     $file->open('w');
-    $file->write("Hello snb\\Storage!\n");
+    $file->write("Hello mychaelstyle\\Storage!\n");
     $file->close();
      
     // you can read
@@ -69,7 +70,7 @@ but this transaction don't support exclusive.
 			'acl'      => AmazonS3::ACL_PUBLIC,
 			'curlopts' => array(CURLOPT_SSL_VERIFYPEER => false)
     );
-    $storage = new snb\Storage($dsn,$options,false);
+    $storage = new mychaelstyle\Storage($dsn,$options,false);
     try {
       $file1 = $storage->createFile('/foo/me.txt');
       $file1->putContents("My name is Masanori Nakashima.\n");
@@ -92,7 +93,7 @@ do followings.
     // create new instance
     $dsn = 'local:///home/hoge/storage';
     $options = array('permission'=>0644,'permission_folder'=>0755)
-    $storage = new snb\Storage($dsn,$options);
+    $storage = new mychaelstyle\Storage($dsn,$options);
     // add a provider
     $dsn = 'amazon_aws://TOKYO/my_bucket';
     $options = array(
@@ -138,11 +139,11 @@ see the AWS PHP SDK.
 
 # How to develop a provider plugin
 
-You can develop anothe storage provider plugin, only extends from snb\storage\Provider class.
+You can develop anothe storage provider plugin, only extends from mychaelstyle\storage\Provider class.
 
 for example,
 
-    class GoogleDrive extends \snb\storage\Provider {
+    class GoogleDrive extends \mychaelstyle\storage\Provider {
       public function connect($dsn,$options=array()){
         $this->perveDsn();
         // ... something to do for connection
