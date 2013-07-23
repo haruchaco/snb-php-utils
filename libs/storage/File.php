@@ -5,6 +5,11 @@
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the Apache2 License. For more information please see
  * <http://github.com/haruchaco>
+ *
+ * @author  Masanori Nakashima <>
+ * @version $Id$
+ * @package snb
+ * @subpackage storage
  */
 
 namespace snb\storage;
@@ -23,9 +28,10 @@ require_once(dirname(__FILE__).'/Exception.php');
  * このオブジェクトはトランザクション処理をサポートします。
  * </p>
  * 
- * @author    Masanori Nakashima <>
- * @version   $Id$
- * @package   snb\storage
+ * @author  Masanori Nakashima <>
+ * @version $Id$
+ * @package snb
+ * @subpackage storage
  */
 class File {
   /**

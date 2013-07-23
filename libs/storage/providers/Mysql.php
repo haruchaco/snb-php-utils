@@ -1,4 +1,10 @@
 <?php
+/**
+ * snb\storage\providers\Mysql
+ * @package snb
+ * @subpackage storage
+ * @auther Masanori Nakashima
+ */
 namespace snb\storage\providers;
 require_once dirname(dirname(__FILE__)).'/Provider.php';
 require_once dirname(dirname(__FILE__)).'/Exception.php';
@@ -27,8 +33,9 @@ require_once dirname(dirname(__FILE__)).'/Exception.php';
  * $file->write("foo\nvar");
  * $file->close();
  *
- * @package snb\storage\providers
- * @autthe Masanori Nakashima
+ * @package snb
+ * @subpackage storage
+ * @auther Masanori Nakashima
  */
 class Mysql extends \snb\storage\Provider {
   /**

@@ -5,6 +5,10 @@
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the Apache2 License. For more information please see
  * <http://github.com/haruchaco>
+ *
+ * @package snb
+ * @subpackage storage
+ * @auther Masanori Nakashima
  */
 
 namespace snb\storage;
@@ -21,7 +25,9 @@ namespace snb\storage;
  * </p>
  * @author    Masanori Nakashima <>
  * @version   $Id$
- * @package   snb\storage
+ * @package snb
+ * @subpackage storage
+ * @auther Masanori Nakashima
  */
 abstract class Provider {
   /**

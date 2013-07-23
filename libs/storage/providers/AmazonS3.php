@@ -1,4 +1,10 @@
 <?php
+/**
+ * snb\storage\providers\Mysql
+ * @package snb
+ * @subpackage storage
+ * @auther Masanori Nakashima
+ */
 namespace snb\storage\providers;
 require_once dirname(dirname(__FILE__)).'/Provider.php';
 require_once dirname(dirname(__FILE__)).'/Exception.php';
@@ -39,9 +45,9 @@ require_once dirname(dirname(__FILE__)).'/Exception.php';
  * - acl      ... acl. see the aws php sdk.
  * - contentType ... content-type
  *
- *
- * @package snb\storage\providers
- * @autthe Masanori Nakashima
+ * @package snb
+ * @subpackage storage
+ * @auther Masanori Nakashima
  */
 class AmazonS3 extends \snb\storage\Provider {
   /**
