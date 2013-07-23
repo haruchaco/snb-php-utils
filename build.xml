@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="snb-storage" basedir="." default="test">
+<project name="PHP Mychaelstyle Utils" basedir="." default="test">
   <target name="test">
     <mkdir dir="tests/work" />
     <mkdir dir="tests/tmp" />
     <mkdir dir="reports" />
     <mkdir dir="reports/coverage" />
     <coverage-setup database="reports/coverage.db">
-      <fileset dir="libs">
+      <fileset dir="src">
         <include name="*.php" />
         <include name="**/*.php" />
       </fileset>
@@ -29,7 +29,7 @@
   <!-- source code duplidate check -->
   <target name="phpcpd">
     <phpcpd minTokens="8">
-      <fileset dir="libs">
+      <fileset dir="src">
         <include name="**/*.php" />
       </fileset>
       <formatter type="pmd" outfile="reports/cpd.xml" />
@@ -39,7 +39,7 @@
   <!-- php md unused source codes -->
   <target name="phpmd">
     <phpmd rulesets="ruleset.xml">
-      <fileset dir="libs">
+      <fileset dir="src">
         <include name="**/*.php" />
       </fileset>
       <formatter type="xml" outfile="reports/pmd.xml" />
@@ -49,8 +49,8 @@
   <!-- phpdoc -->
   <target name="phpdoc">
     <mkdir dir="doc" />
-    <phpdoc title="PHP snb utils api documentation" destdir="./doc" output="HTML:Smarty:PHP">
-      <fileset dir="libs">
+    <phpdoc title="PHP mychaelstyle utils api documentation" destdir="./doc" output="HTML:Smarty:PHP">
+      <fileset dir="src">
         <include name="**/*.php" />
       </fileset>
     </phpdoc>

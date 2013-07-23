@@ -1,0 +1,23 @@
+{
+  "name":"mychaelstyle/php-utils",
+  "description": "library for web apps",
+  "keywords": ["Amazon","AWS","S3","SNS"],
+  "type": "library",
+  "license": "Apache2",
+  "authers": [
+    {
+      "name":"Masanori Nakashima",
+      "email":"",
+      "homepage":"http://www.mychaelstyle.com/"
+    }
+  ],
+  "require-dev":{
+    "phpunit/phpunit": "3.*"
+    "phing/phing": "2.*"
+  },
+  "autoload":{
+    "psr-0":{
+      "mychaelstyle\\utils": "src/"
+    }
+  }
+}
