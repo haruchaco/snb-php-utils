@@ -8,6 +8,8 @@ define('DIR_WORK',DIR_TEST.'/work');
 
 set_include_path(get_include_path().':'.DIR_LIBS);
 
+require_once(DIR_PROJECT."/vendor/autoload.php");
+
 require_once DIR_TEST.'/mychaelstyle/TestBase.php';
 
 if(!is_dir(DIR_TMP)){

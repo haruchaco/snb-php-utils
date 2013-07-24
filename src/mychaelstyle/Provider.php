@@ -5,6 +5,7 @@
  * @auther Masanori Nakashima
  */
 namespace mychaelstyle;
+require_once dirname(__FILE__).'/Exception.php';
 /**
  * mychaelstyle\Provider
  * @package mychaelstyle

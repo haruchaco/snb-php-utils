@@ -11,8 +11,11 @@
       "homepage":"http://www.mychaelstyle.com/"
     }
   ],
+  "require": {
+    "aws/aws-sdk-php": "2.*"
+  },
   "require-dev":{
-    "phpunit/phpunit": "3.*"
+    "phpunit/phpunit": "3.*",
     "phing/phing": "2.*"
   },
   "autoload":{
