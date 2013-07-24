@@ -31,7 +31,6 @@ class AmazonDynamoDBTest extends \mychaelstyle\TestBase
   protected function setUp()
   {
     parent::setUp();
-    require_once($_SERVER['AWS_PHPSDK']);
     $this->object = new AmazonDynamoDB;
     // set your aws key and secret to your env
     $this->dsn = 'AmazonDynamoDB://REGION_'.$_SERVER['AWS_REGION_NAME'].'/tests';

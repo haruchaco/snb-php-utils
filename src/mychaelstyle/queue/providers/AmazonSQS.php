@@ -44,13 +44,14 @@ class AmazonSQS extends \mychaelstyle\queue\Provider {
    * connection create
    */
   public function connect($uri,$options=array()){
-    $this->sqs = new \AmazonSQS($options);
     list($this->region,$this->queue) = explode('/',$uri);
-    $region = constant('\AmazonSQS::'.$this->region);
+    $region = constant('Aws\Common\Enum\Region::'.$this->region);
     $this->region = (is_null($region)) ? $this->region : $region;
-		$this->sqs->set_region($this->region);
+    $options['region'] = $this->region;
+    $this->sqs = \Aws\Sqs\SqsClient::factory($options);
     // get url
-    $this->url = $this->sqs->create_queue($this->queue)->body->CreateQueueResult->QueueUrl;
+    $result = $this->sqs->createQueue(array('QueueName'=>(string)$this->queue));
+    $this->url = $result->get('QueueUrl');
   }
   /**
    * push to queue
@@ -59,13 +60,14 @@ class AmazonSQS extends \mychaelstyle\queue\Provider {
     if(!is_scalar($body)){
       $body = json_encode($body);
     }
-    $result = $this->sqs->send_message($this->url,$body);
-    if($result->isOK()){
-      return true;
-    } else if(isset($result->body) && isset($result->body->Error)){
-      throw new \mychaelstyle\Exception('Fail to offer! '.$result->body->Error->Message,\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION); 
-    } else {
-      throw new \mychaelstyle\Exception('Fail to connect SQS! '.print_r($result,true),\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION); 
+    try{
+      $result = $this->sqs->sendMessage(
+        array(
+          'QueueUrl' => $this->url,
+          'MessageBody' => $body
+        ));
+    } catch(\Exception $e){
+      throw new \mychaelstyle\Exception('AWS SQS Fail to offer message! ',\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
     }
   }
   /**
@@ -81,35 +83,19 @@ class AmazonSQS extends \mychaelstyle\queue\Provider {
    * peek a head from this queue
    */
   public function peek($callback=null,$callbackParams=array()){
-    $result = $this->sqs->receive_message($this->url);
-    if($result->isOK()){
-      if(isset($result->body->ReceiveMessageResult->Message)){
-        $msgObj = $result->body->ReceiveMessageResult->Message;
-        $this->receipt = $msgObj->ReceiptHandle;
-        $this->message_id = $msgObj->MessageId;;
-        if(is_callable($callback)){
-          $params = array();
-          if(is_array($callbackParams)){
-            $params = $callbackParams;
-          } else {
-            $params[] = $callbackParams;
-          }
-          $params[] = $result;
-          call_user_func_array($callback,$params);
-        }
-        $message = $msgObj->Body;
-        if($ret = json_decode($message)){
-          return $ret;
-        } else {
-          return $message;
-        }
+    try{
+      $result = $this->sqs->receiveMessage(array('QueueUrl'=>$this->url));
+      $messages = $result->getPath('Messages/*/Body');
+      $receipts  = $result->getPath('Messages/*/ReceiptHandle');
+      $this->receipt = $receipts[0];
+      $decoded = json_decode($messages[0]);
+      if(is_null($decoded)){
+        return $messages[0];
       } else {
-        return null;
+        return $decoded;
       }
-    } else if(isset($result->body) && isset($result->body->Error)){
-      throw new \mychaelstyle\Exception('Fail to peek queue! '.$result->body->Error->Message,\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION); 
-    } else {
-      throw new \mychaelstyle\Exception('Fail to peek queue! '.print_r($result,true),\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION); 
+    } catch(\Exception $e){
+      throw new \mychaelstyle\Exception('AWS SQS Fail to receive message! ',\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
     }
   }
 
@@ -122,13 +108,10 @@ class AmazonSQS extends \mychaelstyle\queue\Provider {
     }
     if(!is_null($this->receipt)){
       $handle = (string) $this->receipt;
-      $result = $this->sqs->delete_message($this->url,$handle);
-      if($result->isOK()){
-        $this->receipt = null;
-      } else if(isset($result->body) && isset($result->body->Error)){
-        throw new \mychaelstyle\Exception('Fail to remove queue! '.$result->body->Error->Message,\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION); 
-      } else {
-        throw new \mychaelstyle\Exception('Fail to remove queue! '.print_r($result,true),\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION); 
+      try {
+        $result = $this->sqs->deleteMessage(array('QueueUrl'=>$this->url,'ReceiptHandle'=>$handle));
+      } catch(\Exception $e){
+        throw new \mychaelstyle\Exception('AWS SQS Fail to remove message! ',\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
       }
     }
   }
