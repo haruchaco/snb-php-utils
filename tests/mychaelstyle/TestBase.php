@@ -214,6 +214,7 @@ class TestBase extends \PHPUnit_Framework_TestCase
    */
   protected function assertLocalWritten($dsn,$expected,$uri){
     $path = $this->getLocalPathUsingUri($dsn,$uri);
+    $this->assertTrue(file_exists($path),$path.' is not exist');
     $result = file_get_contents($path);
     $this->assertEquals($expected,$result);
   }
@@ -223,7 +224,7 @@ class TestBase extends \PHPUnit_Framework_TestCase
    * provider\Local
    */
   protected function getLocalPathUsingUri($dsn,$uri){
-    $dir = str_replace('local://','',$dsn);
+    $dir = str_replace('Local://','',$dsn);
     return $dir.(preg_match('/^\//',$uri)>0 ? '':'/').$uri;
   }
 
@@ -231,7 +232,7 @@ class TestBase extends \PHPUnit_Framework_TestCase
    * assertion the file is deleted
    */
   protected function assertLocalDeleted($dsn,$uri){
-    $dir = str_replace('local://','',$dsn);
+    $dir = str_replace('Local://','',$dsn);
     $path = $dir.$uri;
     $this->assertFalse(file_exists($path));
   }

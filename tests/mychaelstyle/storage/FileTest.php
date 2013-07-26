@@ -38,7 +38,7 @@ class FileTest extends \mychaelstyle\TestBase
   public function setUp()
   {
     parent::setUp();
-    $this->dsn = 'local://'.DIR_WORK;
+    $this->dsn = 'Local://'.DIR_WORK;
     $this->options = array('permission'=>0666);
     $this->uri = 'tmp.txt';
     $this->storage = new \mychaelstyle\Storage($this->dsn);
@@ -102,7 +102,6 @@ class FileTest extends \mychaelstyle\TestBase
     // get contents
     $result = $this->object->getContents();
     $this->assertEquals($expected,$result);
-
   }
   
   /**

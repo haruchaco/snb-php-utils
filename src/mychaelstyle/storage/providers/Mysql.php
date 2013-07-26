@@ -11,7 +11,7 @@ require_once dirname(dirname(dirname(__FILE__))).'/utils/File.php';
 /**
  * ファイルをMySQL保存するストレージプロバイダ
  * 
- * [DSN] mysql://[database]/[table]
+ * [DSN] Mysql://[database]/[table]
  *
  * e.g. local://home/foo/var
  *
@@ -26,7 +26,7 @@ require_once dirname(dirname(dirname(__FILE__))).'/utils/File.php';
  *   'pass'   => 'foovar',
  *   'slaves' => array('localhost:3306','slavehost:3306')
  * );
- * $dsn = 'mysql://localhost:3306/filedb/filetable';
+ * $dsn = 'Mysql://localhost:3306/filedb/filetable';
  * $storage = new mychaelstyle\Storage($dsn,$options);
  * $file = $storage.createFile('example.txt',$options); 
  * $file->open('w');
@@ -81,13 +81,7 @@ class Mysql implements \mychaelstyle\storage\Provider {
     $this->table = $elms[2];
     if(strpos($this->table,'?')!==false){
       list($this->table,$opts) = explode('?',$this->table);
-      $ops = explode('&',$opts);
-      if(is_array($ops) && count($ops)>0){
-        foreach($ops as $k => $v){
-          $fn = 'field_'.$k;
-          $this->$fn = $v;
-        }
-      }
+      $this->parseUriParams($opts);
     }
     $this->options = $options;
     if(isset($this->options['pdo'])){

@@ -5,16 +5,17 @@ mychaelstyle/php-utils is imple utilities for php 5.
 
 # Outline
 
-1. mychaelstyle\\Storage version 0.1.0 ... easy access to online storages.
-2. mychaelstyle\\queue\\Factory  version 0.1.0 ... easy access to online storages.
+1. Storage version 0.1.0 ... easy access to online storages.
+2. Datastore version 0.1.0 ... easy access to key value stores.
+3. queue\\Factory  version 0.1.0 ... easy access to queue service.
 
 # mychaelstyle\\Storage
 
-mychaelstyle\\Storage is an uploading utility class to online or offline storage services.
+Storage is an uploading utility class to online or offline storage services.
 You can transfer and read, write files like local files only simple configurations.
 
 
-mychaelstyle\\Storageはローカルファイルを扱い様な感覚で様々なストレージサービスにファイルを保存するライブラリです。
+Storageはローカルファイルを扱い様な感覚で様々なストレージサービスにファイルを保存するライブラリです。
 簡単な設定だけで同時に複数のストレージにファイルをアップロードすることもできます
 
 #### Supported storage

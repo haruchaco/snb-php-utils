@@ -41,15 +41,13 @@ abstract class ProviderFactory {
     $object->connect($this->uri,$options);
     return $object;
   }
- /**
+  /**
    * get provider class name
    * @param string $dsn
    * @return string driver name
    */
   protected function getClass($dsn,$package,$path){
-    if(is_null($this->name)){
-      $this->perse($dsn);
-    }
+    $this->perse($dsn);
     $baseName = $this->name;
     $baseName = str_replace('_','',$baseName);
     $filePath = $path.'/'.$baseName.'.php';
@@ -67,8 +65,11 @@ abstract class ProviderFactory {
    * @param string $dsn
    */
   protected function perse($dsn){
-    if(false===strpos($dsn,'://')){
-      throw new \mychaelstyle\Exception('The dsn provider name is null!',
+    if(is_null($dsn) || strlen($dsn)==0){
+      throw new \mychaelstyle\Exception('The dsn is invalid format!',
+        \mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION);
+    } else if(false===strpos($dsn,'://')){
+      throw new \mychaelstyle\Exception('The dsn is invalid format!',
         \mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION);
     }
     list($this->name, $this->uri) = explode('://',$dsn);

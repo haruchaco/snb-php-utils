@@ -28,18 +28,18 @@ class StorageTest extends \mychaelstyle\TestBase
     parent::setUp();
     $this->dsnMap = array(
       'Local' => array(
-        'dsn' => 'local://'.DIR_WORK,
+        'dsn' => 'Local://'.DIR_WORK,
         'options' => array('permission'=>0644),
       ),
       'Local2' => array(
-        'dsn' => 'local://'.DIR_TMP,
+        'dsn' => 'Local://'.DIR_TMP,
         'options' => array('permission'=>0644),
       ),
       'AmazonS3' => array(
-        'dsn' => 'amazon_s3://REGION_'.$_SERVER['SNB_AWS_S3_REGION_NAME'].'/'.$_SERVER['SNB_AWS_S3_BUCKET'],
+        'dsn' => 'AmazonS3://'.$_SERVER['AWS_REGION_NAME'].'/'.$_SERVER['AWS_S3_BUCKET'],
         'options' => array(
-          'key' => $_SERVER['SNB_AWS_KEY'],
-          'secret' => $_SERVER['SNB_AWS_SECRET'],
+          'key' => $_SERVER['AWS_KEY'],
+          'secret' => $_SERVER['AWS_SECRET'],
           'default_cache_config' => '',
           'certificate_autority' => false
         )
@@ -109,13 +109,13 @@ class StorageTest extends \mychaelstyle\TestBase
   {
     $def1 = $this->dsnMap['Local'];
     $def2 = $this->dsnMap['Local2'];
+    $this->object = new Storage($def1['dsn'],$def1['options'],false);
     $this->object->addProvider($def2['dsn'],$def2['options']);
 
     $file = $this->object->createFile($this->uri_example);
 
     $expected = 'This is test 2 providers!';
     $this->fileWrite($file,$expected);
-
     $this->assertLocalWritten($def1['dsn'],$expected,$this->uri_example);
     $this->assertLocalWritten($def2['dsn'],$expected,$this->uri_example);
 

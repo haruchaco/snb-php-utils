@@ -14,6 +14,7 @@ namespace mychaelstyle;
 require_once(dirname(__FILE__).'/Exception.php');
 require_once(dirname(__FILE__).'/storage/File.php');
 require_once(dirname(__FILE__).'/storage/Provider.php');
+require_once(dirname(__FILE__).'/storage/Factory.php');
 /**
  * Storage class.
  * 
@@ -24,6 +25,10 @@ require_once(dirname(__FILE__).'/storage/Provider.php');
  * @auther Masanori Nakashima
  */
 class Storage {
+  /**
+   * @var storage/Factory
+   */
+  private $factory = null;
   /**
    * DNS roots
    * @var array
@@ -51,6 +56,7 @@ class Storage {
    * @param boolean $autoCommit
    */
   public function __construct($dsn,$options=array(),$autoCommit=true){
+    $this->factory = new \mychaelstyle\storage\Factory();
     $this->dsn_map = array();
     $this->auto_commit = $autoCommit;
     $this->addProvider($dsn,$options);
@@ -100,11 +106,11 @@ class Storage {
     foreach($this->dsn_map as $dsn => $defaultOptions){
       $options = array_merge($defaultOptions,$options);
       try{
-        $provider = storage\Provider::getInstance($dsn,$options);
+        $provider = $this->factory->getProvider($dsn,$options);
         $provider->put($path,$uri);
-      } catch(storage\Exception $e){
+      } catch(\Exception $e){
         $this->remove($uri);
-        throw new storage\Exception('Commit failed! '.$dsn,0,$e);
+        throw new \mychaelstyle\Exception('Commit failed! '.$dsn,0,$e);
       }
     }
   }
@@ -117,14 +123,14 @@ class Storage {
     $exceptions = array();
     foreach($this->dsn_map as $dsn => $options){
       try{
-        $provider = storage\Provider::getInstance($dsn,$options);
+        $provider = $this->factory->getProvider($dsn,$options);
         return $provider->get($uri,$path);
-      } catch(storage\Exception $e){
+      } catch(\Exception $e){
         $exceptions[] = $e;
       }
     }
     if(count($exceptions)>0){
-      throw new storage\Exception('Fail to get file! '.$uri,0,null,$exceptions);
+      throw new mychaelstyle\Exception('Fail to get file! '.$uri,0,null,$exceptions);
     }
   }
   /**
@@ -135,9 +141,9 @@ class Storage {
     $messages = '';
     foreach($this->dsn_map as $dsn => $options){
       try{
-        $provider = storage\Provider::getInstance($dsn,$options);
+        $provider = $this->factory->getProvider($dsn,$options);
         $provider->remove($uri);
-      } catch(storage\Exception $e){
+      } catch(\Exception $e){
         $messages .= ':'.$e->getCode().' '.$e->getMessage();
       }
     }

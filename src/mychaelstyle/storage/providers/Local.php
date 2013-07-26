@@ -10,9 +10,9 @@ require_once dirname(dirname(__FILE__)).'/Provider.php';
 /**
  * ファイルをローカルファイルシステムに保存するストレージプロバイダ
  * 
- * [DSN] local://[directory path]
+ * [DSN] Local://[directory path]
  *
- * e.g. local:///home/foo/var
+ * e.g. Local:///home/foo/var
  *
  * [Initialize Options]
  * 'permission' => 8進数 Unix形式で指定。
@@ -27,7 +27,7 @@ require_once dirname(dirname(__FILE__)).'/Provider.php';
  *   'permission' => 0644
  *   'folder_permission' => 0755
  * );
- * $uri = 'local:///home/foo/var';
+ * $uri = 'Local:///home/foo/var';
  * $storage = new mychaelstyle\Storage($uri,$options);
  * $file = $storage.createFile('example.txt',$options); 
  * $file->open('w');
@@ -53,7 +53,7 @@ class Local implements \mychaelstyle\storage\Provider {
 	/**
    * connect a local file system.
    * and check the root path.
-   * @param string $uri '/[local base folder path]'. e.g. 'local:///tmp/foo'
+   * @param string $uri '/[local base folder path]'. e.g. 'Local:///tmp/foo'
    * @param array $options map has keys 'permission' and 'folder_permission'. e.g. array('permission'=>0666,'folder_permission'=>0755)
 	 * @see Provider::connect()
 	 */

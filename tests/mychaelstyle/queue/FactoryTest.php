@@ -26,12 +26,10 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
   protected function setUp()
   {
     $this->object = new Factory;
-    require_once($_SERVER['SNB_AWS_PHPSDK']);
-    // set your aws key and secret to your env
-    $this->dsn = 'AmazonSQS://REGION_'.$_SERVER['SNB_AWS_S3_REGION_NAME'].'/tests';
+    $this->dsn = 'AmazonSQS://'.$_SERVER['AWS_REGION_NAME'].'/tests';
     $this->options = array(
-      'key' => $_SERVER['SNB_AWS_KEY'],
-      'secret' => $_SERVER['SNB_AWS_SECRET'],
+      'key' => $_SERVER['AWS_KEY'],
+      'secret' => $_SERVER['AWS_SECRET'],
       'default_cache_config' => '',
       'certificate_autority' => false
     );
