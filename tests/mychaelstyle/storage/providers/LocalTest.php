@@ -24,7 +24,7 @@ class LocalTest extends \mychaelstyle\TestBase
   protected function setUp()
   {
     parent::setUp();
-    $this->dsn = 'local://'.DIR_WORK;
+    $this->dsn = DIR_WORK;
     // new
     $this->object = new Local;
     clearstatcache();
@@ -64,7 +64,7 @@ class LocalTest extends \mychaelstyle\TestBase
   public function testConnectInvalid1()
   {
     // invalid name
-    $dsn = 'invalidname://'.DIR_TEST;
+    $dsn = DIR_TEST.'/hogehoge';
     $options = array('permission' => 0644);
     $this->object->connect($dsn,$options);
   }
@@ -77,7 +77,7 @@ class LocalTest extends \mychaelstyle\TestBase
   public function testConnectInvalid2()
   {
     // no path
-    $dsn = 'local://';
+    $dsn = '';
     $options = array('permission' => 0644);
     $this->object->connect($dsn,$options);
   }
@@ -90,7 +90,7 @@ class LocalTest extends \mychaelstyle\TestBase
   public function testConnectInvalid3()
   {
     // no path dir
-    $dsn = 'local:///foo/foo/foo';
+    $dsn = '/foo/foo/foo';
     $options = array('permission' => 0644);
     $this->object->connect($dsn,$options);
   }

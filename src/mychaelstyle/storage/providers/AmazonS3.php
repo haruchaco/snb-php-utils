@@ -6,13 +6,14 @@
  * @auther Masanori Nakashima
  */
 namespace mychaelstyle\storage\providers;
+require_once dirname(dirname(dirname(__FILE__))).'/ProviderAws.php';
 require_once dirname(dirname(__FILE__)).'/Provider.php';
 /**
- * ファイルをAmazon Web Service S#に保存するストレージプロバイダ
+ * ファイルをAmazon Web Service S3に保存するストレージプロバイダ
  * 
- * [DSN] amazon_s3://[region]/[bucket name]
+ * [DSN] AmazonS3://[region]/[bucket name]
  *
- * e.g. amazon_s3://REGION_TOKYO/logs_archives
+ * e.g. AmazonS3://REGION_TOKYO/logs_archives
  *
  * [Initialize Options] same with aws php sdk credentials.
  * - key    ... Amazon Web Services Key.
@@ -20,7 +21,7 @@ require_once dirname(dirname(__FILE__)).'/Provider.php';
  * - default_cache_config ... see the aws php sdk document.
  * - certificate_autority ... see the aws php sdk document.
  *
- * - curlopts ... curl options.
+ * - curl.options ... curl options.
  * - acl      ... acl. see the aws php sdk.
  * - contentType ... content-type
  *
@@ -30,17 +31,17 @@ require_once dirname(dirname(__FILE__)).'/Provider.php';
  *   'secret' => 'your secret',
  *   'default_cache_config => '',
  *   'certificate_autority' => false,
- *   'curlopts' => array(CURLOPT_SSL_VERIFYPEER => false),
+ *   'curl.options' => array(CURLOPT_SSL_VERIFYPEER => false),
  *   'acl' => AmazonS3::ACL_PUBLIC,
  *   'contentType' => 'image/png'
  * );
  * $provider = new AmazonS3();
- * $provider->connect($dsn,$options);
+ * $provider->connect($uri,$options);
  *
  * [File options]
  * If is not set, use the initialize options value.
  * 
- * - curlopts ... curl options.
+ * - curl.options ... curl options.
  * - acl      ... acl. see the aws php sdk.
  * - contentType ... content-type
  *
@@ -48,43 +49,41 @@ require_once dirname(dirname(__FILE__)).'/Provider.php';
  * @subpackage storage
  * @auther Masanori Nakashima
  */
-class AmazonS3 extends \mychaelstyle\storage\Provider {
+class AmazonS3 extends \mychaelstyle\ProviderAws implements \mychaelstyle\storage\Provider {
   /**
-   * region
-   */
-  private $region = null;
-  /**
-   * base path to save files
+   * @var base path to save files
    */
   private $bucket_name = null;
   /**
-   * s3 object
+   * @var $options
    */
-  private $s3 = null;
+  private $options = array();
   /**
    * constructor
    */
   public function __construct(){
-    $this->options = array();
-    $this->region = null;
     $this->bucket_name = null;
+  }
+  /**
+   * get AWS Service name
+   * @return string service client name e.g. 'Sqs'
+   */
+  public function getServiceName(){
+    return 'S3';
   }
 	/**
 	 * prepare connect an AmazonS3 bucket.
-   * @param string $dsn 'amazon_s3://[region name]/[bucket_name]/'
+   * @param string $uri '[region name]/[bucket_name]/'
    * @param array $options map. see the AmazonS3 options.
 	 * @see Provider::connect()
 	 */
-	public function connect($dsn,$options=array()){
-    $this->perseDsn($dsn);
-    list($this->region,$this->bucket_name) = explode('/',$this->provider_root);
-    $this->options = $options;
-    // region
-    $region = constant('\AmazonS3::'.$this->region);
-    $this->region = (is_null($region)) ? $this->region : $region;
-    // create object
-		$this->s3 = new \AmazonS3($this->options);
-		$this->s3->set_region($this->region);
+	public function connect($uri,$options=array()){
+    parent::connect($uri,$options);
+    if(strpos($uri,'/')===false){
+      throw new \mychaelstyle\Exception('Fail to connect amazon s3! bucket_name is required!',
+        \mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION);
+    }
+    $this->bucket_name = substr($uri,strpos($uri,'/')+1);
   }
   /**
    * disconnect.
@@ -92,25 +91,22 @@ class AmazonS3 extends \mychaelstyle\storage\Provider {
 	 * @see Provider::disconnect()
    */
   public function disconnect(){
-    $this->provider_name = null;
-    $this->provider_root = null;
-    $this->region = null;
+    parent::disconnect();
     $this->bucket_name = null;
-    $this->s3 = null;
-    $this->options = array();
   }
   /**
    * get contents from uri
    */
   public function get($uri,$path=null){
-    $uri = $this->_formatUri($uri);
+    $uri = $this->__formatUri($uri);
     $localPath = (!is_null($path) ) ?
       $path :tempnam(sys_get_temp_dir(),'mychaelstyle_aws_s3_tmp_');
-		$response = $this->s3->get_object(
-      $this->bucket_name,
-      $uri,
-      array('fileDownload' => $localPath));
-		if ($response->isOK()) {
+    try {
+      $this->client->getObject(array(
+        'Bucket' => $this->bucket_name,
+        'Key'    => $uri,
+        'SaveAs' => $localPath
+      ));
       if(is_null($path)){
         $contents = file_get_contents($localPath);
         @unlink($localPath);
@@ -118,11 +114,13 @@ class AmazonS3 extends \mychaelstyle\storage\Provider {
       } else {
         return true;
       }
-		} else if(file_exists($path)){
-      @unlink($path);
+    } catch(\Exception $e){
+      if(file_exists($path)){
+        @unlink($path);
+      }
+      throw new \mychaelstyle\Exception('Fail to download from amazon s3!',
+        \mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION);
     }
-    throw new \mychaelstyle\Exception('Fail to download from amazon s3!',
-      \mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION);
   }
 	/**
 	 * put file
@@ -131,20 +129,33 @@ class AmazonS3 extends \mychaelstyle\storage\Provider {
    * @param array $options
 	 */
 	public function put($srcPath,$dstUri,$options=array()){
-    $dstUri = $this->_formatUri($dstUri);
+    $dstUri = $this->__formatUri($dstUri);
 		$this->remove($dstUri);
-    $options = $this->_mergePutOptions($options);
-    $options['fileUpload'] = $srcPath; 
-		$response = $this->s3->create_object(
-      $this->bucket_name,
-      $dstUri,
-      $options
-    );
-		if ($response->isOK()) {
-      return true;
-		} else {
-      throw new \mychaelstyle\Exception('Fail to upload to amazon s3!',
-        \mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION);
+    $options = $this->__mergePutOptions($options);
+    $fh = null;
+    try {
+      $fh = fopen($srcPath,'r+');
+      if($fh){
+        $this->client->setConfig((isset($options['curl.options']) ? $options['curl.options'] : null));
+        $this->client->putObject(array(
+          'Bucket'   => $this->bucket_name,
+          'Key'      => $dstUri,
+          'Body'     => $fh,
+          'Metadata' => isset($options['Metadata']) ? $options['Metadata'] : null,
+        ));
+        if(!is_null($fh) && is_resource($fh)){
+          fclose($fh);
+        }
+      } else {
+        throw new \mychaelstyle\Exception('Fail to upload to amazon s3!',
+          \mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION);
+      }
+    } catch(\Exception $e){
+      if(!is_null($fh) && is_resource($fh)){
+        fclose($fh);
+      }
+      throw new \mychaelstyle\Exception('Fail to upload to amazon s3! '.$e->getMessage(),
+        \mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e);
     }
   }
 	/**
@@ -153,48 +164,46 @@ class AmazonS3 extends \mychaelstyle\storage\Provider {
 	 * @param boolean $recursive
 	 */
 	public function remove($dstUri,$recursive=false){
-    $dstUri = $this->_formatUri($dstUri);
-		$response = $this->s3->delete_objects(
-      $this->bucket_name,
-      array(  
-			  'objects' => array(array('key' => $dstUri)))
-    );
-		if ($response->isOK()) {
-      return true;
-    } else {
-      return false;
+    $dstUri = $this->__formatUri($dstUri);
+    try {
+      $this->client->deleteObject(array(
+        'Bucket' => $this->bucket_name,
+        'Key'    => $dstUri
+      ));
+    } catch(\Exception $e){
+      throw new \mychaelstyle\Exception('Fail to delete object on amazon s3! '.$e->getMessage(),
+        \mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e);
     }
-		return true;
   }
   /**
    * merge options for put.
    * @param array $options
    * @return array
    */
-  private function _mergePutOptions($options){
+  private function __mergePutOptions($options){
     $mergedOpts = array_merge($this->options,$options);
     if(isset($options['acl'])){
       $mergedOpts['acl'] = $options['acl'];
     } else if(!isset($options['acl']) || strlen($options['acl'])==0){
-      $mergedOpts['acl'] = \AmazonS3::ACL_PUBLIC;
+      $mergedOpts['acl'] = 'private';
     }
     if(isset($options['contentType'])){
       $mergedOpts['contentType'] = $options['contentType'];
     } else if(!isset($options['contentType']) || strlen($options['contentType'])==0){
       $mergedOpts['contentType'] = 'text/plain';
     }
-    if(isset($options['curlopts'])){
-      $mergedOpts['curlopts'] = $options['curlopts'];
-    } else if(!isset($options['curlopts']) ||
-      !is_array($options['curlopts']) || count($options['curlopts'])==0){
-      $mergedOpts['curlopts'] = array(CURLOPT_SSL_VERIFYPEER => false);
+    if(isset($options['curl.options'])){
+      $mergedOpts['curl.options'] = $options['curl.options'];
+    } else if(!isset($options['curl.options']) ||
+      !is_array($options['curl.options']) || count($options['curl.options'])==0){
+      $mergedOpts['curl.options'] = array(CURLOPT_SSL_VERIFYPEER => false);
     }
     return $mergedOpts;
   }
   /**
    * format uri for S3
    */
-  private function _formatUri($uri){
+  private function __formatUri($uri){
 		if( strpos($uri,'/')===0 ){
 			$uri = substr($uri,1);
 		}

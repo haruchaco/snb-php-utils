@@ -6,6 +6,7 @@
  * @auther Masanori Nakashima
  */
 namespace mychaelstyle\queue\providers;
+require_once dirname(dirname(dirname(__FILE__))).'/ProviderAws.php';
 require_once dirname(dirname(__FILE__)).'/Provider.php';
 /**
  * Queue provider of Amazon SQS
@@ -13,15 +14,7 @@ require_once dirname(dirname(__FILE__)).'/Provider.php';
  * @subpackage queue
  * @auther Masanori Nakashima
  */
-class AmazonSQS extends \mychaelstyle\queue\Provider {
-  /**
-   * @var \AmazonSQS
-   */
-  private $sqs = null;
-  /**
-   * @var string region
-   */
-  private $region = null;
+class AmazonSQS extends \mychaelstyle\ProviderAws implements \mychaelstyle\queue\Provider {
   /**
    * @var string queue name
    */
@@ -38,20 +31,36 @@ class AmazonSQS extends \mychaelstyle\queue\Provider {
    * @var string message id of last read
    */
   private $message_id = null;
+  /**
+   * constructor
+   */
   public function __construct(){
+  }
+  /**
+   * get AWS Service name
+   * @return string service client name e.g. 'Sqs'
+   */
+  public function getServiceName(){
+    return 'Sqs';
   }
   /**
    * connection create
    */
   public function connect($uri,$options=array()){
-    list($this->region,$this->queue) = explode('/',$uri);
-    $region = constant('Aws\Common\Enum\Region::'.$this->region);
-    $this->region = (is_null($region)) ? $this->region : $region;
-    $options['region'] = $this->region;
-    $this->sqs = \Aws\Sqs\SqsClient::factory($options);
-    // get url
-    $result = $this->sqs->createQueue(array('QueueName'=>(string)$this->queue));
+    parent::connect($uri,$options);
+    $this->queue = substr($uri,strpos($uri,'/')+1);
+    $result = $this->client->createQueue(array('QueueName'=>(string)$this->queue));
     $this->url = $result->get('QueueUrl');
+  }
+  /**
+   * disconnect
+   */
+  public function disconnect(){
+    parent::disconnect();
+    $this->queue = null;
+    $this->url = null;
+    $this->receipt = null;
+    $this->message_id = null;
   }
   /**
    * push to queue
@@ -61,7 +70,7 @@ class AmazonSQS extends \mychaelstyle\queue\Provider {
       $body = json_encode($body);
     }
     try{
-      $result = $this->sqs->sendMessage(
+      $result = $this->client->sendMessage(
         array(
           'QueueUrl' => $this->url,
           'MessageBody' => $body
@@ -84,7 +93,7 @@ class AmazonSQS extends \mychaelstyle\queue\Provider {
    */
   public function peek($callback=null,$callbackParams=array()){
     try{
-      $result = $this->sqs->receiveMessage(array('QueueUrl'=>$this->url));
+      $result = $this->client->receiveMessage(array('QueueUrl'=>$this->url));
       $messages = $result->getPath('Messages/*/Body');
       $receipts  = $result->getPath('Messages/*/ReceiptHandle');
       $this->receipt = $receipts[0];
@@ -109,7 +118,7 @@ class AmazonSQS extends \mychaelstyle\queue\Provider {
     if(!is_null($this->receipt)){
       $handle = (string) $this->receipt;
       try {
-        $result = $this->sqs->deleteMessage(array('QueueUrl'=>$this->url,'ReceiptHandle'=>$handle));
+        $result = $this->client->deleteMessage(array('QueueUrl'=>$this->url,'ReceiptHandle'=>$handle));
       } catch(\Exception $e){
         throw new \mychaelstyle\Exception('AWS SQS Fail to remove message! ',\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
       }

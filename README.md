@@ -145,7 +145,6 @@ for example,
 
     class GoogleDrive extends \mychaelstyle\storage\Provider {
       public function connect($dsn,$options=array()){
-        $this->perveDsn();
         // ... something to do for connection
       }
       public function get($uri,$pathto=null){
@@ -160,4 +159,22 @@ for example,
         // something to do,
       }
     }
+
+## Testing
+
+You should set following envs for Tests of AWS plougins.
+
+* AWS_KEY
+* AWS_SECRET_KEY
+* AWS_REGION
+* AWS_S3_BUCKET
+
+e.g. for .*rc
+
+    AWS_KEY="Your aws key"
+    AWS_SECRET_KEY="Your aws secret key"
+    AWS_REGION="TOKYO"
+    AWS_S3_BUCKET="your-bucket-name"
+    export AWS_KEY AWS_SECRET_KEY AWS_REGION AWS_S3_BUCKET
+
 

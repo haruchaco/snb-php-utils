@@ -14,7 +14,7 @@ class MysqlTest extends \mychaelstyle\TestBase
   /**
    * @var string
    */
-  protected $dsn;
+  protected $uri;
   /**
    * @var array options
    */
@@ -28,7 +28,7 @@ class MysqlTest extends \mychaelstyle\TestBase
   {
     parent::setUp();
     $this->object = new Mysql;
-    $this->dsn = 'mysql://localhost/test/m_files';
+    $this->uri = 'localhost/test/m_files';
     $this->options = array(
       'user' => 'root',
       'pass' => '',
@@ -53,15 +53,15 @@ class MysqlTest extends \mychaelstyle\TestBase
   public function testConnect()
   {
     // simple
-    $this->object->connect($this->dsn,$this->options);
+    $this->object->connect($this->uri,$this->options);
     $this->object->disconnect();
     // with port
-    $dsn = 'mysql://localhost:3306/test/m_files';
-    $this->object->connect($dsn,$this->options);
+    $uri = 'localhost:3306/test/m_files';
+    $this->object->connect($uri,$this->options);
     $this->object->disconnect();
     // with params
-    $dsn = 'mysql://localhost:3306/test/m_files?uri=uri&contents=contents';
-    $this->object->connect($dsn,$this->options);
+    $uri = 'localhost:3306/test/m_files?uri=uri&contents=contents';
+    $this->object->connect($uri,$this->options);
     $this->object->disconnect();
     // with pdo
 		$pdodsn = 'mysql:dbname=test;host=localhost;port=3306';
@@ -69,11 +69,11 @@ class MysqlTest extends \mychaelstyle\TestBase
     $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
     $pdo->setAttribute(\PDO::ATTR_TIMEOUT, (defined('MYSQL_TIMEOUT') ? MYSQL_TIMEOUT : 5));
     $this->options['pdo'] = $pdo;
-    $this->object->connect($dsn,$this->options);
+    $this->object->connect($uri,$this->options);
     $this->object->disconnect();
     // with pdo array
     $this->options['pdo'] = array($pdo,$pdo);
-    $this->object->connect($dsn,$this->options);
+    $this->object->connect($uri,$this->options);
     $this->object->disconnect();
 
 
@@ -85,7 +85,7 @@ class MysqlTest extends \mychaelstyle\TestBase
    */
   public function testPut()
   {
-    $this->object->connect($this->dsn,$this->options);
+    $this->object->connect($this->uri,$this->options);
     $this->object->put($this->org_example,'/tmp.txt',array());
   }
 
@@ -95,7 +95,7 @@ class MysqlTest extends \mychaelstyle\TestBase
    */
   public function testGet()
   {
-    $this->object->connect($this->dsn,$this->options);
+    $this->object->connect($this->uri,$this->options);
     // get contents
     $contents = $this->object->get('/tmp.txt');
     $this->assertEquals(file_get_contents($this->org_example),$contents);

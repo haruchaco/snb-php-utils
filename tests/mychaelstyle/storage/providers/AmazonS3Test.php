@@ -8,13 +8,12 @@ require_once 'storage/providers/AmazonS3.php';
  * add the following env variables to your environment.
  *
  * <pre>
- * SNB_AWS_PHPSDK="${HOME}/Library/aws-sdk-for-php/sdk.class.php"
- * SNB_AWS_KEY=[your aws key]
- * SNB_AWS_SECRET=[your aws secret]
- * SNB_AWS_S3_BUCKET="your bucket name"
- * SNB_AWS_S3_REGION_NAME="TOKYO"
- * SNB_AWS_S3_REGION_HOST="s3-ap-northeast-1.amazonaws.com"
- * export SNB_AWS_PHPSDK SNB_AWS_KEY SNB_AWS_SECRET SNB_AWS_S3_BUCKET SNB_AWS_REGION_NAME SNB_AWS_S3_REGION_HOST
+ * AWS_KEY=[your aws key]
+ * AWS_SECRET=[your aws secret]
+ * AWS_S3_BUCKET="your bucket name"
+ * AWS_REGION_NAME="TOKYO"
+ * AWS_REGION_HOST="s3-ap-northeast-1.amazonaws.com"
+ * export AWS_KEY AWS_SECRET AWS_S3_BUCKET SNB_AWS_REGION_NAME SNB_AWS_S3_REGION_HOST
  * </pre>
  */
 class AmazonS3Test extends \mychaelstyle\TestBase
@@ -46,16 +45,15 @@ class AmazonS3Test extends \mychaelstyle\TestBase
   public function setUp()
   {
     parent::setUp();
-    require_once($_SERVER['SNB_AWS_PHPSDK']);
     $this->path_example = DIR_FIXTURES.'/example.txt';
     $this->uri = 'example.txt';
-    $this->url = 'https://'.$_SERVER['SNB_AWS_S3_REGION_HOST'].'/'.$_SERVER['SNB_AWS_S3_BUCKET'].'/'.$this->uri;
+    $this->url = 'https://'.$_SERVER['AWS_REGION_HOST'].'/'.$_SERVER['AWS_S3_BUCKET'].'/'.$this->uri;
     // dsn
-    $this->dsn = 'amazon_s3://REGION_'.$_SERVER['SNB_AWS_S3_REGION_NAME'].'/'.$_SERVER['SNB_AWS_S3_BUCKET'];
+    $this->dsn = $_SERVER['AWS_REGION_NAME'].'/'.$_SERVER['AWS_S3_BUCKET'];
     // set your aws key and secret to your env
     $this->options = array(
-      'key' => $_SERVER['SNB_AWS_KEY'],
-      'secret' => $_SERVER['SNB_AWS_SECRET'],
+      'key' => $_SERVER['AWS_KEY'],
+      'secret' => $_SERVER['AWS_SECRET'],
       'default_cache_config' => '',
       'certificate_autority' => false
     );
@@ -70,7 +68,6 @@ class AmazonS3Test extends \mychaelstyle\TestBase
    */
   public function tearDown()
   {
-    $this->object->disconnect();
     parent::tearDown();
   }
 
@@ -81,7 +78,7 @@ class AmazonS3Test extends \mychaelstyle\TestBase
    */
   public function testConnectFail1(){
     $this->object = new AmazonS3;
-    $dsn = 'failname://REGION_'.$_SERVER['SNB_AWS_S3_REGION_NAME'].'/'.$_SERVER['SNB_AWS_S3_BUCKET'];
+    $dsn = $_SERVER['AWS_REGION_NAME'];
     $this->object->connect($dsn,$this->options);
   }
 
@@ -92,20 +89,30 @@ class AmazonS3Test extends \mychaelstyle\TestBase
    */
   public function testConnectFail2(){
     $this->object = new AmazonS3;
-    $dsn = 'amazon_s3://';
+    $dsn = '';
+    $this->object->connect($dsn,$this->options);
+  }
+
+  /**
+   * @covers mychaelstyle\storage\providers\AmazonS3::connect
+   * @covers mychaelstyle\storage\Provider::perseDsn
+   * @expectedException mychaelstyle\Exception
+   */
+  public function testConnectFail3(){
+    $this->object = new AmazonS3;
+    $dsn = $_SERVER['AWS_S3_BUCKET'];
     $this->object->connect($dsn,$this->options);
   }
 
   /**
    * @covers mychaelstyle\storage\providers\AmazonS3::connect
    * @covers mychaelstyle\storage\providers\AmazonS3::__construct
-   * @covers mychaelstyle\storage\Provider::getInstance
-   * @covers mychaelstyle\storage\Provider::perseDsn
+   * @covers mychaelstyle\storage\Factory::getInstance
    */
   public function testConnect()
   {
-    $this->object = \mychaelstyle\storage\Provider::getInstance($this->dsn,$this->options);
     $this->object = new AmazonS3;
+    $dsn = $_SERVER['AWS_REGION_NAME'].'/'.$_SERVER['AWS_S3_BUCKET'];
     $this->object->connect($this->dsn,$this->options);
   }
 
@@ -132,16 +139,11 @@ class AmazonS3Test extends \mychaelstyle\TestBase
     // put a example file
     $options = array('contentType'=>'text/plain;charset=UTF8');
     $this->object->put($this->path_example,$this->uri,$options);
-    $result = $this->httpRequest($this->url,null);
-    $this->assertEquals($expected,$result['body']);
-    // put a example file
     $options = array('contentType'=>'text/plain');
     $options['contentType'] = null;
-    $options['acl'] = \AmazonS3::ACL_PUBLIC;
-    $options['curlopts'] = array(CURLOPT_SSL_VERIFYPEER => false);
+    $options['acl'] = 'private';
+    //$options['curl.options'] = array(CURLOPT_SSL_VERIFYPEER => false);
     $this->object->put($this->path_example,$this->uri,$options);
-    $result = $this->httpRequest($this->url,null);
-    $this->assertEquals($expected,$result['body']);
   }
 
   /**
@@ -197,8 +199,6 @@ class AmazonS3Test extends \mychaelstyle\TestBase
     }
     // remove
     $this->object->remove($this->uri);
-    $result = $this->httpRequest($this->url,null);
-    $this->assertNotEquals('200',$result['code']);
   }
 
 }

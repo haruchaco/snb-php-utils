@@ -27,8 +27,8 @@ require_once dirname(dirname(__FILE__)).'/Provider.php';
  *   'permission' => 0644
  *   'folder_permission' => 0755
  * );
- * $dsn = 'local:///home/foo/var';
- * $storage = new mychaelstyle\Storage($dsn,$options);
+ * $uri = 'local:///home/foo/var';
+ * $storage = new mychaelstyle\Storage($uri,$options);
  * $file = $storage.createFile('example.txt',$options); 
  * $file->open('w');
  * $file->write("foo\nvar");
@@ -38,7 +38,7 @@ require_once dirname(dirname(__FILE__)).'/Provider.php';
  * @subpackage storage
  * @auther Masanori Nakashima
  */
-class Local extends \mychaelstyle\storage\Provider {
+class Local implements \mychaelstyle\storage\Provider {
   /**
    * @var string base path to save files
    */
@@ -53,18 +53,17 @@ class Local extends \mychaelstyle\storage\Provider {
 	/**
    * connect a local file system.
    * and check the root path.
-   * @param string $dsn 'local://[local base folder path]'. e.g. 'local:///tmp/foo'
+   * @param string $uri '/[local base folder path]'. e.g. 'local:///tmp/foo'
    * @param array $options map has keys 'permission' and 'folder_permission'. e.g. array('permission'=>0666,'folder_permission'=>0755)
 	 * @see Provider::connect()
 	 */
-	public function connect($dsn,$options=array()){
-    $this->perseDsn($dsn);
+	public function connect($uri,$options=array()){
     // check the folder permision
-    if(!is_dir($this->provider_root)){
-      throw new \mychaelstyle\Exception('The base path is not a directory! '.$this->provider_root,
+    if(!is_dir($uri)){
+      throw new \mychaelstyle\Exception('The base path is not a directory! '.$uri,
         \mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION);
     }
-    $this->base_path = preg_replace('/\/$/','',$this->provider_root);
+    $this->base_path = preg_replace('/\/$/','',$uri);
     $this->options = $options;
     if(!isset($this->options['permission'])){
       $this->options['permission'] = 0644;
@@ -78,8 +77,6 @@ class Local extends \mychaelstyle\storage\Provider {
 	 * @see Provider::disconnect()
    */
   public function disconnect(){
-    $this->provider_name = null;
-    $this->provider_root = null;
     $this->base_path = null;
     $this->options = array();
   }

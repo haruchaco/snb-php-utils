@@ -11,11 +11,15 @@ require_once dirname(__FILE__).'/Exception.php';
  * @package mychaelstyle
  * @auther Masanori Nakashima
  */
-abstract class Provider {
+interface Provider {
   /**
    * connect
    * @param string $uri
    * @param array $options
    */
-  abstract public function connect($uri,$options=array());
+  public function connect($uri,$options=array());
+  /**
+   * disconnect
+   */
+  public function disconnect();
 }

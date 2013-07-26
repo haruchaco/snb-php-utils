@@ -6,6 +6,7 @@
  * @auther Masanori Nakashima
  */
 namespace mychaelstyle\datastore\providers;
+require_once dirname(dirname(dirname(__FILE__))).'/ProviderAws.php';
 require_once dirname(dirname(__FILE__)).'/Provider.php';
 /**
  * Queue provider of Amazon SQS
@@ -13,34 +14,24 @@ require_once dirname(dirname(__FILE__)).'/Provider.php';
  * @subpackage datastore
  * @auther Masanori Nakashima
  */
-class AmazonDynamoDB extends \mychaelstyle\datastore\Provider {
-  /**
-   * @var \AmazonDynamoDB
-   */
-  private $dynamo = null;
-  /**
-   * @var string region
-   */
-  private $region = null;
-  /**
-   * @var string table name
-   */
-  private $table = null;
+class AmazonDynamoDB extends \mychaelstyle\ProviderAws implements \mychaelstyle\datastore\Provider {
   /**
    * constructor
    */
   public function __construct(){
   }
   /**
+   * get AWS Service name
+   * @return string service client name e.g. 'Sqs'
+   */
+  public function getServiceName(){
+    return 'DynamoDb';
+  }
+  /**
    * connection create
    */
   public function connect($uri,$options=array()){
-//    $this->dynamo = new \AmazonDynamoDB($options);
-    list($this->region,$this->table) = explode('/',$uri);
-    $region = constant('Aws\Common\Enum\Region::'.$this->region);
-    $this->region = (is_null($region)) ? $this->region : $region;
-    $options['region'] = $this->region;
-    $this->dynamo = \Aws\DynamoDb\DynamoDbClient::factory($options);
+    parent::connect($uri,$options);
   }
   /**
    * batch write datas
@@ -56,7 +47,7 @@ class AmazonDynamoDB extends \mychaelstyle\datastore\Provider {
       foreach($rows as $row){
         $item = array(
           'PutRequest' => array(
-            'Item' => $this->dynamo->formatAttributes($row)
+            'Item' => $this->client->formatAttributes($row)
           ),
         );
         $requestData['RequestItems'][$table][] = $item;
@@ -64,7 +55,7 @@ class AmazonDynamoDB extends \mychaelstyle\datastore\Provider {
     }
     // request
     try {
-      $this->dynamo->batchWriteItem($requestData);
+      $this->client->batchWriteItem($requestData);
     } catch( \Exception $e ){
       throw new \mychaelstyle\Exception('AWS DynamoDB Fail to write! ',\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
     }
@@ -80,7 +71,7 @@ class AmazonDynamoDB extends \mychaelstyle\datastore\Provider {
       );
       $items = array();
       foreach($rows as $row){
-        $items[] = $this->dynamo->formatAttributes($row);;
+        $items[] = $this->client->formatAttributes($row);;
       }
       $requestData['RequestItems'][$table] = array(
         'Keys' => $items,
@@ -90,7 +81,7 @@ class AmazonDynamoDB extends \mychaelstyle\datastore\Provider {
     // request
     $response = null;
     try{
-      $response = $this->dynamo->batchGetItem($requestData);
+      $response = $this->client->batchGetItem($requestData);
     } catch(\Exception $e){
       throw new \mychaelstyle\Exception('AWS DynamoDB Fail to batchGetItem! ',\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
     }
@@ -125,7 +116,7 @@ class AmazonDynamoDB extends \mychaelstyle\datastore\Provider {
       foreach($rows as $row){
         $item = array(
           'DeleteRequest' => array(
-            'Key' => $this->dynamo->formatAttributes($row)
+            'Key' => $this->client->formatAttributes($row)
           ),
         );
         $requestData['RequestItems'][$table][] = $item;
@@ -133,7 +124,7 @@ class AmazonDynamoDB extends \mychaelstyle\datastore\Provider {
     }
     // request
     try {
-      $this->dynamo->batchWriteItem($requestData);
+      $this->client->batchWriteItem($requestData);
     } catch( \Exception $e ){
       throw new \mychaelstyle\Exception('AWS DynamoDB Fail to remove! ',\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
     }
@@ -158,7 +149,9 @@ class AmazonDynamoDB extends \mychaelstyle\datastore\Provider {
     $result = $this->batchGet($keys);
     return (isset($result[$table]) && isset($result[$table][0])) ? $result[$table][0] : null;
   }
-
+  /**
+   * remove
+   */
   public function remove($table,$key){
     $keys = array(
       $table => array(

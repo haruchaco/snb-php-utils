@@ -13,9 +13,9 @@ require_once dirname(dirname(__FILE__)).'/Provider.php';
  * @subpackage queue
  * @auther Masanori Nakashima
  */
-abstract class Provider extends \mychaelstyle\Provider {
-  abstract public function offer($body);
-  abstract public function poll($callback=null);
-  abstract public function peek($callback=null);
-  abstract public function remove();
+interface Provider extends \mychaelstyle\Provider {
+  public function offer($body);
+  public function poll($callback=null);
+  public function peek($callback=null);
+  public function remove();
 }
