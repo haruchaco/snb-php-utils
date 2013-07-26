@@ -7,4 +7,6 @@ php:
 
 script: phpunit --coverage-text -c ./phpunit.xml
 
+before_script:
+  - composer install
 
