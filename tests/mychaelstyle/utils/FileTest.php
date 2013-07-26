@@ -34,8 +34,8 @@ class FileTest extends \mychaelstyle\TestBase
   {
   }
   /**
-   * @covers mychaelstyle\utils\File::encode
-   * @covers mychaelstyle\utils\File::decode
+   * @covers mychaelstyle\utils\File::base64encode
+   * @covers mychaelstyle\utils\File::base64decode
    * @covers mychaelstyle\utils\File::base64
    */
   public function testEncode(){

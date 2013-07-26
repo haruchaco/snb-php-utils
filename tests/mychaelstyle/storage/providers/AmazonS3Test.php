@@ -72,8 +72,10 @@ class AmazonS3Test extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\AmazonS3::getServiceName
+   * @covers mychaelstyle\storage\providers\AmazonS3::getPath
    * @covers mychaelstyle\storage\providers\AmazonS3::connect
-   * @covers mychaelstyle\storage\Provider::perseDsn
+   * @covers mychaelstyle\ProviderAws::connect
    * @expectedException mychaelstyle\Exception
    */
   public function testConnectFail1(){
@@ -84,7 +86,7 @@ class AmazonS3Test extends \mychaelstyle\TestBase
 
   /**
    * @covers mychaelstyle\storage\providers\AmazonS3::connect
-   * @covers mychaelstyle\storage\Provider::perseDsn
+   * @covers mychaelstyle\ProviderAws::connect
    * @expectedException mychaelstyle\Exception
    */
   public function testConnectFail2(){
@@ -95,7 +97,7 @@ class AmazonS3Test extends \mychaelstyle\TestBase
 
   /**
    * @covers mychaelstyle\storage\providers\AmazonS3::connect
-   * @covers mychaelstyle\storage\Provider::perseDsn
+   * @covers mychaelstyle\ProviderAws::connect
    * @expectedException mychaelstyle\Exception
    */
   public function testConnectFail3(){
@@ -106,7 +108,7 @@ class AmazonS3Test extends \mychaelstyle\TestBase
 
   /**
    * @covers mychaelstyle\storage\providers\AmazonS3::connect
-   * @covers mychaelstyle\storage\providers\AmazonS3::__construct
+   * @covers mychaelstyle\ProviderAws::connect
    * @covers mychaelstyle\storage\Factory::getInstance
    */
   public function testConnect()
@@ -118,6 +120,7 @@ class AmazonS3Test extends \mychaelstyle\TestBase
 
   /**
    * @covers mychaelstyle\storage\providers\AmazonS3::disconnect
+   * @covers mychaelstyle\ProviderAws::disconnect
    */
   public function testDisconnect()
   {
@@ -127,8 +130,8 @@ class AmazonS3Test extends \mychaelstyle\TestBase
   /**
    * @covers mychaelstyle\storage\providers\AmazonS3::put
    * @covers mychaelstyle\storage\providers\AmazonS3::remove
-   * @covers mychaelstyle\storage\providers\AmazonS3::_mergePutOptions
-   * @covers mychaelstyle\storage\providers\AmazonS3::_formatUri
+   * @covers mychaelstyle\storage\providers\AmazonS3::__mergePutOptions
+   * @covers mychaelstyle\storage\providers\AmazonS3::__formatUri
    */
   public function testPut()
   {
@@ -148,8 +151,8 @@ class AmazonS3Test extends \mychaelstyle\TestBase
 
   /**
    * @covers mychaelstyle\storage\providers\AmazonS3::get
-   * @covers mychaelstyle\storage\providers\AmazonS3::_mergePutOptions
-   * @covers mychaelstyle\storage\providers\AmazonS3::_formatUri
+   * @covers mychaelstyle\storage\providers\AmazonS3::__mergePutOptions
+   * @covers mychaelstyle\storage\providers\AmazonS3::__formatUri
    * @depends testPut
    */
   public function testGet()
@@ -172,8 +175,8 @@ class AmazonS3Test extends \mychaelstyle\TestBase
   }
   /**
    * @covers mychaelstyle\storage\providers\AmazonS3::get
-   * @covers mychaelstyle\storage\providers\AmazonS3::_mergePutOptions
-   * @covers mychaelstyle\storage\providers\AmazonS3::_formatUri
+   * @covers mychaelstyle\storage\providers\AmazonS3::__mergePutOptions
+   * @covers mychaelstyle\storage\providers\AmazonS3::__formatUri
    * @expectedException mychaelstyle\Exception
    */
   public function testGetFail()
@@ -188,8 +191,8 @@ class AmazonS3Test extends \mychaelstyle\TestBase
 
   /**
    * @covers mychaelstyle\storage\providers\AmazonS3::remove
-   * @covers mychaelstyle\storage\providers\AmazonS3::_mergePutOptions
-   * @covers mychaelstyle\storage\providers\AmazonS3::_formatUri
+   * @covers mychaelstyle\storage\providers\AmazonS3::__mergePutOptions
+   * @covers mychaelstyle\storage\providers\AmazonS3::__formatUri
    * @depends testPut
    */
   public function testRemove()

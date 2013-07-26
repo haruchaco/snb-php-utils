@@ -126,4 +126,13 @@ class Net {
     }
     return false;
   }
+  /**
+   * clear static vars
+   */
+  public static function clear(){
+    self::$REMOTE_ADDRESS = null;
+    self::$REMOTE_HOST = null;
+    self::$LANGUAGE = null;
+ 
+  }
 }
