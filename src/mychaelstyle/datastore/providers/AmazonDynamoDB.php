@@ -57,7 +57,7 @@ class AmazonDynamoDB extends \mychaelstyle\ProviderAws implements \mychaelstyle\
     try {
       $this->client->batchWriteItem($requestData);
     } catch( \Exception $e ){
-      throw new \mychaelstyle\Exception('AWS DynamoDB Fail to write! ',\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
+      throw new \mychaelstyle\Exception('AWS DynamoDB Fail to write! '.$e->getMessage(),\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
     }
   }
   public function batchGet(array $keys){
@@ -83,7 +83,7 @@ class AmazonDynamoDB extends \mychaelstyle\ProviderAws implements \mychaelstyle\
     try{
       $response = $this->client->batchGetItem($requestData);
     } catch(\Exception $e){
-      throw new \mychaelstyle\Exception('AWS DynamoDB Fail to batchGetItem! ',\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
+      throw new \mychaelstyle\Exception('AWS DynamoDB Fail to batchGetItem! '.$e->getMessage(),\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
     }
     $tables = array_keys($keys);
     $retMap = array();
@@ -126,7 +126,7 @@ class AmazonDynamoDB extends \mychaelstyle\ProviderAws implements \mychaelstyle\
     try {
       $this->client->batchWriteItem($requestData);
     } catch( \Exception $e ){
-      throw new \mychaelstyle\Exception('AWS DynamoDB Fail to remove! ',\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
+      throw new \mychaelstyle\Exception('AWS DynamoDB Fail to remove! '.$e->getMessage(),\mychaelstyle\Exception::ERROR_PROVIDER_CONNECTION,$e); 
     }
 
   }
