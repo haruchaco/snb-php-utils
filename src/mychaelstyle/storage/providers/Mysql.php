@@ -7,6 +7,7 @@
  */
 namespace mychaelstyle\storage\providers;
 require_once dirname(dirname(__FILE__)).'/Provider.php';
+require_once dirname(dirname(dirname(__FILE__))).'/ProviderMysql.php';
 require_once dirname(dirname(dirname(__FILE__))).'/utils/File.php';
 /**
  * ファイルをMySQL保存するストレージプロバイダ
@@ -37,11 +38,7 @@ require_once dirname(dirname(dirname(__FILE__))).'/utils/File.php';
  * @subpackage storage
  * @auther Masanori Nakashima
  */
-class Mysql implements \mychaelstyle\storage\Provider {
-  /**
-   * @var string $database database name.
-   */
-  private $database;
+class Mysql extends \mychaelstyle\ProviderMysql implements \mychaelstyle\storage\Provider {
   /**
    * @var string $table table name.
    */
@@ -65,53 +62,11 @@ class Mysql implements \mychaelstyle\storage\Provider {
     $this->options = array();
   }
 
-	/**
-   * connect a local file system.
-   * and check the root path.
-   * @param string $dsn 'Mysql://[host:port]/[database]/[table]'. e.g. 'Mysql://localhost:3306/foo/var'
-   * @param array $options map has keys '' and 'folder_permission'. e.g. array('permission'=>0666,'folder_permission'=>0755)
-	 * @see Provider::connect()
-	 */
-	public function connect($uri,$options=array()){
-    $elms = explode('/',$uri);
-    if(count($elms)<3){
-      throw new \mychaelstyle\Exception('File storage provider mysql: invalid dsn!',0);
-    }
-    $this->database = $elms[1];
-    $this->table = $elms[2];
-    if(strpos($this->table,'?')!==false){
-      list($this->table,$opts) = explode('?',$this->table);
-      $this->parseUriParams($opts);
-    }
-    $this->options = $options;
-    if(isset($this->options['pdo'])){
-      if(is_array($this->options['pdo'])){
-        $this->connections = array_merge($this->connections,$this->options['pdo']);
-      } else {
-        $this->connections[0] = $this->options['pdo'];
-      }
-    } else if(!isset($options['user']) || !isset($options['pass'])){
-      throw new \mychaelstyle\Exception('File storage provider mysql: invalid options! require user and pass!',0);
-    } else {
-      $hosts = (isset($options['slaves']) && is_array($options['slaves']))?$options['slaves']:array();
-      array_unshift($hosts,$elms[0]);
-      foreach($hosts as $host){
-        $host = strpos($host,':')===false ? $host : substr($host,0,strpos($host,':'));
-        $port = strpos($host,':')===false ? 3306 : substr($host,strpos($host,':')+1);
-        $dsn = 'mysql:dbname='.$this->database.';host='.$host.';port='.$port;
-        $conn = new \PDO( $dsn, $options['user'], $options['pass'], array(\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8') );
-        $conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
-        $conn->setAttribute(\PDO::ATTR_TIMEOUT, (defined('MYSQL_TIMEOUT') ? MYSQL_TIMEOUT : 5));
-        $this->connections[] = $conn;
-      }
-    }
-  }
-
   /**
    * parse uri parameters
    * @param string parameter strings form encoded
    */
-  private function parseUriParams($param){
+  protected function parseUriParams($param){
     if(!is_null($param)){
       $elms = explode('&',$param);
       $map = array();
@@ -154,6 +109,7 @@ class Mysql implements \mychaelstyle\storage\Provider {
     $statement->bindValue(':uri',$uri,\PDO::PARAM_STR);
     $statement->execute();
 		$result = $statement->fetch(\PDO::FETCH_ASSOC);
+    $statement->closeCursor();
     $tmp = tempnam(sys_get_temp_dir(),'tmp_mychaelstyle_storage_mysql_');
     if(file_put_contents($tmp,$result['contents'])){
       if(is_null($path)){
@@ -191,6 +147,7 @@ class Mysql implements \mychaelstyle\storage\Provider {
       $statement->bindValue(':uri',$dstUri,\PDO::PARAM_STR);
       $statement->bindValue(':contents',$contents,\PDO::PARAM_STR);
       $statement->execute();
+      $statement->closeCursor();
       @unlink($tmp);
     } catch(\Exception $e){
       @unlink($tmp);
@@ -210,6 +167,7 @@ class Mysql implements \mychaelstyle\storage\Provider {
     $statement = $pdo->prepare($sql);
     $statement->bindValue(':uri',$dstUri,\PDO::PARAM_STR);
     $statement->execute();
+    $statement->closeCursor();
   }
 
   /**

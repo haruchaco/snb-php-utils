@@ -32,6 +32,7 @@ class MysqlTest extends \mychaelstyle\TestBase
     $this->options = array(
       'user' => 'root',
       'pass' => '',
+      'table' => 'm_files',
     );
   }
 
@@ -56,7 +57,7 @@ class MysqlTest extends \mychaelstyle\TestBase
     $this->object->connect($this->uri,$this->options);
     $this->object->disconnect();
     // with port
-    $uri = 'localhost:3306/test/m_files';
+    $uri = 'localhost:3306/test';
     $this->object->connect($uri,$this->options);
     $this->object->disconnect();
     // with params

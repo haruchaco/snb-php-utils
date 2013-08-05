@@ -15,7 +15,11 @@ class ProviderMysql implements Provider {
   /**
    * @var string $database database name.
    */
-  private $database;
+  protected $database;
+  /**
+   * @var array $options
+   */
+  protected $options = array();
   /**
    * @var PDO $connections
    */
@@ -30,16 +34,16 @@ class ProviderMysql implements Provider {
 	/**
    * connect a local file system.
    * and check the root path.
-   * @param string $dsn 'Mysql://[host:port]/[database]/[table]'. e.g. 'Mysql://localhost:3306/foo/var'
-   * @param array $options map has keys '' and 'folder_permission'. e.g. array('permission'=>0666,'folder_permission'=>0755)
+   * @param string $dsn 'Mysql://[host:port]/[database]/'. e.g. 'Mysql://localhost:3306/foo'
+   * @param array $options map
 	 * @see Provider::connect()
 	 */
 	public function connect($uri,$options=array()){
     $elms = explode('/',$uri);
-    if(count($elms)<3){
+    if(count($elms)===0){
       throw new \mychaelstyle\Exception('provider mysql: invalid dsn!',0);
     }
-    $this->database = $elms[1];
+    $this->database = $elms[0];
     $this->table = $elms[2];
     if(strpos($this->table,'?')!==false){
       list($this->table,$opts) = explode('?',$this->table);
@@ -83,23 +87,6 @@ class ProviderMysql implements Provider {
    * @param string parameter strings form encoded
    */
   protected function parseUriParams($param){
-    if(!is_null($param)){
-      $elms = explode('&',$param);
-      $map = array();
-      foreach($elms as $elm){
-        if(strpos($elm,'=')!==false){
-          $mp = explode('=',$elm);
-          $key = array_shift($mp);
-          $map[$key] = implode('=',$mp);
-        }
-      }
-      if(isset($map['uri']) && strlen($map['uri'])>0){
-        $this->field_uri = $map['uri'];
-      }
-      if(isset($map['contents']) && strlen($map['contents'])>0){
-        $this->field_contents = $map['contents'];
-      }
-    }
   }
  
 }
