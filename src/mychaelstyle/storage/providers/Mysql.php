@@ -51,39 +51,25 @@ class Mysql extends \mychaelstyle\ProviderMysql implements \mychaelstyle\storage
    * @var string $field_contents field name for the file contents.
    */
   private $field_contents = 'contents';
-  /**
-   * @var PDO $connections
-   */
-  private $connections = array();
    /**
    * constructor
    */
   public function __construct(){
-    $this->options = array();
+    parent::__construct();
   }
 
-  /**
-   * parse uri parameters
-   * @param string parameter strings form encoded
-   */
-  protected function parseUriParams($param){
-    if(!is_null($param)){
-      $elms = explode('&',$param);
-      $map = array();
-      foreach($elms as $elm){
-        if(strpos($elm,'=')!==false){
-          $mp = explode('=',$elm);
-          $key = array_shift($mp);
-          $map[$key] = implode('=',$mp);
-        }
-      }
-      if(isset($map['uri']) && strlen($map['uri'])>0){
-        $this->field_uri = $map['uri'];
-      }
-      if(isset($map['contents']) && strlen($map['contents'])>0){
-        $this->field_contents = $map['contents'];
-      }
-    }
+	/**
+   * connect a local file system.
+   * and check the root path.
+   * @param string $dsn 'Mysql://[host:port]/[database]/[table]'. e.g. 'Mysql://localhost:3306/foo/var'
+   * @param array $options map has keys '' and 'folder_permission'. e.g. array('permission'=>0666,'folder_permission'=>0755)
+	 * @see Provider::connect()
+	 */
+	public function connect($uri,$options=array()){
+    parent::connect($uri,$options);
+    $this->table = $this->options['table'];
+    $this->field_uri = isset($this->options['uri']) ? $this->options['uri']: 'uri';
+    $this->field_contents = isset($this->options['contents']) ? $this->options['contents']: 'contents';
   }
 
   /**
@@ -91,8 +77,7 @@ class Mysql extends \mychaelstyle\ProviderMysql implements \mychaelstyle\storage
 	 * @see Provider::disconnect()
    */
   public function disconnect(){
-    $this->options = array();
-    $this->database= null;
+    parent::disconnect();
     $this->table = null;
     $this->field_uri= 'uri';
     $this->field_contents= 'contents';
@@ -103,7 +88,7 @@ class Mysql extends \mychaelstyle\ProviderMysql implements \mychaelstyle\storage
    */
   public function get($uri,$path=null){
     $uri = $this->__formatUri($uri);
-    $pdo = $this->connections[array_rand($this->connections)];
+    $pdo = $this->getConnection();
     $sql = sprintf('SELECT %s FROM %s WHERE %s=:uri',$this->field_contents,$this->table,$this->field_uri);
     $statement = $pdo->prepare($sql);
     $statement->bindValue(':uri',$uri,\PDO::PARAM_STR);
@@ -136,7 +121,7 @@ class Mysql extends \mychaelstyle\ProviderMysql implements \mychaelstyle\storage
 	 */
 	public function put($srcPath,$dstUri,$options=array()){
     $dstUri = $this->__formatUri($dstUri);
-    $pdo = $this->connections[0];
+    $pdo = $this->getConnection(true);
     $this->remove($dstUri);
     $tmp = tempnam(sys_get_temp_dir(),'tmp_mychaelstyle_storage_mysql_');
     \mychaelstyle\utils\File::base64encode($srcPath,$tmp);
@@ -162,7 +147,7 @@ class Mysql extends \mychaelstyle\ProviderMysql implements \mychaelstyle\storage
 	 */
 	public function remove($dstUri,$recursive=false){
     $dstUri = $this->__formatUri($dstUri);
-    $pdo = $this->connections[0];
+    $pdo = $this->getConnection(true);
     $sql = sprintf('DELETE FROM %s WHERE %s=:uri',$this->table,$this->field_uri);
     $statement = $pdo->prepare($sql);
     $statement->bindValue(':uri',$dstUri,\PDO::PARAM_STR);

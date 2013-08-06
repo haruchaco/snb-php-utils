@@ -7,6 +7,7 @@
  */
 namespace mychaelstyle\datastore\providers;
 require_once dirname(dirname(__FILE__)).'/Provider.php';
+require_once dirname(dirname(dirname(__FILE__))).'/ProviderMysql.php';
 require_once dirname(dirname(dirname(__FILE__))).'/utils/File.php';
 /**
  * ファイルをMySQL保存するデータストアプロバイダ
@@ -37,11 +38,7 @@ require_once dirname(dirname(dirname(__FILE__))).'/utils/File.php';
  * @subpackage datastore
  * @auther Masanori Nakashima
  */
-class Mysql implements \mychaelstyle\datastore\Provider {
-  /**
-   * @var string $database database name.
-   */
-  private $database;
+class Mysql extends \mychaelstyle\ProviderMysql implements \mychaelstyle\datastore\Provider {
   /**
    * @var string $table table name.
    */
@@ -54,15 +51,11 @@ class Mysql implements \mychaelstyle\datastore\Provider {
    * @var string $field_contents field name for the file contents.
    */
   private $field_contents = 'contents';
-  /**
-   * @var PDO $connections
-   */
-  private $connections = array();
    /**
    * constructor
    */
   public function __construct(){
-    $this->options = array();
+    parent::__construct();
   }
 
 	/**
@@ -73,62 +66,10 @@ class Mysql implements \mychaelstyle\datastore\Provider {
 	 * @see Provider::connect()
 	 */
 	public function connect($uri,$options=array()){
-    $elms = explode('/',$uri);
-    if(count($elms)<3){
-      throw new \mychaelstyle\Exception('File datastore provider mysql: invalid dsn!',0);
-    }
-    $this->database = $elms[1];
-    $this->table = $elms[2];
-    if(strpos($this->table,'?')!==false){
-      list($this->table,$opts) = explode('?',$this->table);
-      $this->perseUriParams($opts);
-    }
-    $this->options = $options;
-    if(isset($this->options['pdo'])){
-      if(is_array($this->options['pdo'])){
-        $this->connections = array_merge($this->connections,$this->options['pdo']);
-      } else {
-        $this->connections[0] = $this->options['pdo'];
-      }
-    } else if(!isset($options['user']) || !isset($options['pass'])){
-      throw new \mychaelstyle\Exception('File datastore provider mysql: invalid options! require user and pass!',0);
-    } else {
-      $hosts = (isset($options['slaves']) && is_array($options['slaves']))?$options['slaves']:array();
-      array_unshift($hosts,$elms[0]);
-      foreach($hosts as $host){
-        $host = strpos($host,':')===false ? $host : substr($host,0,strpos($host,':'));
-        $port = strpos($host,':')===false ? 3306 : substr($host,strpos($host,':')+1);
-        $dsn = 'mysql:dbname='.$this->database.';host='.$host.';port='.$port;
-        $conn = new \PDO( $dsn, $options['user'], $options['pass'], array(\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8') );
-        $conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
-        $conn->setAttribute(\PDO::ATTR_TIMEOUT, (defined('MYSQL_TIMEOUT') ? MYSQL_TIMEOUT : 5));
-        $this->connections[] = $conn;
-      }
-    }
-  }
-
-  /**
-   * perse uri parameters
-   * @param string parameter strings form encoded
-   */
-  private function perseUriParams($param){
-    if(!is_null($param)){
-      $elms = explode('&',$param);
-      $map = array();
-      foreach($elms as $elm){
-        if(strpos($elm,'=')!==false){
-          $mp = explode('=',$elm);
-          $key = array_shift($mp);
-          $map[$key] = implode('=',$mp);
-        }
-      }
-      if(isset($map['uri']) && strlen($map['uri'])>0){
-        $this->field_uri = $map['uri'];
-      }
-      if(isset($map['contents']) && strlen($map['contents'])>0){
-        $this->field_contents = $map['contents'];
-      }
-    }
+    parent::connect($uri,$options);
+    $this->table = $this->options['table'];
+    $this->field_uri = isset($this->options['uri']) ? $this->options['uri']: 'uri';
+    $this->field_contents = isset($this->options['contents']) ? $this->options['contents']: 'contents';
   }
 
   /**
@@ -136,18 +77,10 @@ class Mysql implements \mychaelstyle\datastore\Provider {
 	 * @see Provider::disconnect()
    */
   public function disconnect(){
-    $this->options = array();
-    $this->database= null;
+    parent::disconnect();
     $this->table = null;
     $this->field_uri= 'uri';
     $this->field_contents= 'contents';
-  }
-
-  private function paramType($value){
-    if(preg_match('',$value)>0){
-      return \PDO::PARAM_INT;
-    }
-    return \PDO::PARAM_STR;
   }
 
   /**
@@ -155,6 +88,7 @@ class Mysql implements \mychaelstyle\datastore\Provider {
    * @param array $datas
    */
   public function batchWrite(array $datas){
+    $pdo = $this->getConnection(true);
     foreach($datas as $table => $rows){
       foreach($rows as $row){
         // use first elment
@@ -181,6 +115,7 @@ class Mysql implements \mychaelstyle\datastore\Provider {
     }
   }
   public function batchGet(array $keys){
+    $pdo = $this->getConnection();
     $retMap = array();
     foreach($keys as $table => $rows){
       $retMap[$table] = isset($retMap[$table])?$retMap[$table]:array();
@@ -209,6 +144,7 @@ class Mysql implements \mychaelstyle\datastore\Provider {
    * batch remove
    */
   public function batchRemove(array $keys){
+    $pdo = $this->getConnection(true);
     foreach($keys as $table => $rows){
       foreach($rows as $row){
         $conds = array();
