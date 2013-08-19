@@ -60,6 +60,7 @@ class MysqlTest extends \mychaelstyle\TestBase
   protected function tearDown()
   {
     parent::tearDown();
+    $this->object->disconnect();
   }
 
   /**
@@ -67,7 +68,11 @@ class MysqlTest extends \mychaelstyle\TestBase
    * @covers mychaelstyle\datastore\providers\Mysql::batchWrite
    * @covers mychaelstyle\datastore\providers\Mysql::get
    * @covers mychaelstyle\datastore\providers\Mysql::batchGet
+   * @covers mychaelstyle\datastore\providers\Mysql::remove
+   * @covers mychaelstyle\datastore\providers\Mysql::batchRemove
    * @covers mychaelstyle\datastore\providers\Mysql::connect
+   * @covers mychaelstyle\datastore\providers\Mysql::disconnect
+   * @covers mychaelstyle\datastore\providers\Mysql::__construct
    */
   public function testFlow()
   {

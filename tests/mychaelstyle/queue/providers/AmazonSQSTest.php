@@ -60,6 +60,7 @@ class AmazonSQSTest extends \mychaelstyle\TestBase
   protected function tearDown()
   {
     parent::tearDown();
+    $this->object->disconnect();
   }
 
   /**
@@ -67,6 +68,8 @@ class AmazonSQSTest extends \mychaelstyle\TestBase
    * @covers mychaelstyle\queue\providers\AmazonSQS::offer
    * @covers mychaelstyle\queue\providers\AmazonSQS::peek
    * @covers mychaelstyle\queue\providers\AmazonSQS::remove
+   * @covers mychaelstyle\queue\providers\AmazonSQS::getServiceName
+   * @covers mychaelstyle\queue\providers\AmazonSQS::disconnect
    */
   public function testStarndardOffer()
   {

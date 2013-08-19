@@ -40,6 +40,7 @@ class LocalTest extends \mychaelstyle\TestBase
     if(file_exists($fpath)){
       unlink($fpath);
     }
+    $this->object->disconnect();
     parent::tearDown();
   }
 
@@ -57,7 +58,9 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
    * @covers mychaelstyle\storage\providers\Local::connect
+   * @covers mychaelstyle\storage\providers\Local::disconnect
    * @covers mychaelstyle\storage\Provider::perseDsn
    * @expectedException mychaelstyle\Exception
    */
@@ -70,7 +73,9 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
    * @covers mychaelstyle\storage\providers\Local::connect
+   * @covers mychaelstyle\storage\providers\Local::disconnect
    * @covers mychaelstyle\storage\Provider::perseDsn
    * @expectedException mychaelstyle\Exception
    */
@@ -83,7 +88,9 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
    * @covers mychaelstyle\storage\providers\Local::connect
+   * @covers mychaelstyle\storage\providers\Local::disconnect
    * @covers mychaelstyle\storage\Provider::perseDsn
    * @expectedException mychaelstyle\Exception
    */
@@ -96,7 +103,9 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
    * @covers mychaelstyle\storage\providers\Local::connect
+   * @covers mychaelstyle\storage\providers\Local::disconnect
    * @covers mychaelstyle\storage\Provider::perseDsn
    * @covers mychaelstyle\storage\providers\Local::__construct
    */
@@ -109,6 +118,7 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
    * @covers mychaelstyle\storage\providers\Local::connect
    * @covers mychaelstyle\storage\providers\Local::disconnect
    */
@@ -126,6 +136,9 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
+   * @covers mychaelstyle\storage\providers\Local::connect
+   * @covers mychaelstyle\storage\providers\Local::disconnect
    * @covers mychaelstyle\storage\providers\Local::get
    * @covers mychaelstyle\storage\providers\Local::getRealPath
    */
@@ -149,6 +162,9 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
+   * @covers mychaelstyle\storage\providers\Local::connect
+   * @covers mychaelstyle\storage\providers\Local::disconnect
    * @covers mychaelstyle\storage\providers\Local::put
    * @covers mychaelstyle\storage\providers\Local::getRealPath
    */
@@ -187,6 +203,9 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
+   * @covers mychaelstyle\storage\providers\Local::connect
+   * @covers mychaelstyle\storage\providers\Local::disconnect
    * @covers mychaelstyle\storage\providers\Local::put
    * @expectedException mychaelstyle\Exception
    */
@@ -203,6 +222,9 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
+   * @covers mychaelstyle\storage\providers\Local::connect
+   * @covers mychaelstyle\storage\providers\Local::disconnect
    * @covers mychaelstyle\storage\providers\Local::put
    * @expectedException mychaelstyle\Exception
    */
@@ -220,6 +242,9 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
+   * @covers mychaelstyle\storage\providers\Local::connect
+   * @covers mychaelstyle\storage\providers\Local::disconnect
    * @covers mychaelstyle\storage\providers\Local::remove
    * @covers mychaelstyle\storage\providers\Local::removeDir
    * @covers mychaelstyle\storage\providers\Local::getRealPath
@@ -244,6 +269,9 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
+   * @covers mychaelstyle\storage\providers\Local::connect
+   * @covers mychaelstyle\storage\providers\Local::disconnect
    * @covers mychaelstyle\storage\providers\Local::remove
    * @covers mychaelstyle\storage\providers\Local::removeDir
    * @covers mychaelstyle\storage\providers\Local::getRealPath
@@ -259,6 +287,9 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
+   * @covers mychaelstyle\storage\providers\Local::connect
+   * @covers mychaelstyle\storage\providers\Local::disconnect
    * @covers mychaelstyle\storage\providers\Local::remove
    * @covers mychaelstyle\storage\providers\Local::removeDir
    * @covers mychaelstyle\storage\providers\Local::getRealPath
@@ -276,6 +307,9 @@ class LocalTest extends \mychaelstyle\TestBase
   }
 
   /**
+   * @covers mychaelstyle\storage\providers\Local::__construct
+   * @covers mychaelstyle\storage\providers\Local::connect
+   * @covers mychaelstyle\storage\providers\Local::disconnect
    * @covers mychaelstyle\storage\providers\Local::remove
    * @covers mychaelstyle\storage\providers\Local::removeDir
    * @covers mychaelstyle\storage\providers\Local::getRealPath

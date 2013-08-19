@@ -83,6 +83,7 @@ class MysqlTest extends \mychaelstyle\TestBase
   /**
    * @covers mychaelstyle\storage\providers\Mysql::put
    * @covers mychaelstyle\storage\providers\Mysql::remove
+   * @covers mychaelstyle\storage\providers\Mysql::__formatUri
    */
   public function testPut()
   {
@@ -92,6 +93,7 @@ class MysqlTest extends \mychaelstyle\TestBase
 
   /**
    * @covers mychaelstyle\storage\providers\Mysql::get
+   * @covers mychaelstyle\storage\providers\Mysql::__formatUri
    * @depends testPut
    */
   public function testGet()

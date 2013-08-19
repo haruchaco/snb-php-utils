@@ -72,12 +72,15 @@ class AmazonS3Test extends \mychaelstyle\TestBase
   public function tearDown()
   {
     parent::tearDown();
+    $this->object->disconnect();
   }
 
   /**
    * @covers mychaelstyle\storage\providers\AmazonS3::getServiceName
    * @covers mychaelstyle\storage\providers\AmazonS3::getPath
    * @covers mychaelstyle\storage\providers\AmazonS3::connect
+   * @covers mychaelstyle\storage\providers\AmazonS3::disconnect
+   * @covers mychaelstyle\storage\providers\AmazonS3::getServiceName
    * @covers mychaelstyle\ProviderAws::connect
    * @expectedException mychaelstyle\Exception
    */
