@@ -45,6 +45,9 @@ class AmazonS3Test extends \mychaelstyle\TestBase
   public function setUp()
   {
     parent::setUp();
+    if($this->markIncompleteIfNoNetwork()){
+      return;
+    }
     $this->path_example = DIR_FIXTURES.'/example.txt';
     $this->uri = 'example.txt';
     $this->url = 'https://'.$_SERVER['AWS_REGION_HOST'].'/'.$_SERVER['AWS_S3_BUCKET'].'/'.$this->uri;

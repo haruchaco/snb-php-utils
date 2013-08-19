@@ -98,7 +98,7 @@ class ProviderMysql implements Provider {
    * get pdo connection
    * @param boolean $writable
    */
-  protected function getConnection($writable=false){
+  public function getConnection($writable=false){
     if($writable){
       if(is_null($this->pdo_master)){
         $this->pdo_master = $this->__connect($this->dsn_master);
@@ -157,7 +157,7 @@ class ProviderMysql implements Provider {
    * get pdo param type
    */
   protected function paramType($value){
-    if(preg_match('',$value)>0){
+    if(preg_match('/^(|\+|\-)([0-9])+$/',$value)>0){
       return \PDO::PARAM_INT;
     }
     return \PDO::PARAM_STR;

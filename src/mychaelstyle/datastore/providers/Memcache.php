@@ -21,7 +21,7 @@ class Memcache implements \mychaelstyle\datastore\Provider {
   /**
    * @var int expire
    */
-  private $expire = (60*60*24*7);
+  private $expire = 604800;
   /**
    * constructor
    */
@@ -31,6 +31,9 @@ class Memcache implements \mychaelstyle\datastore\Provider {
    * connection create
    */
   public function connect($uri,$options=array()){
+    if(!class_exists('Memcached')){
+      throw new \mychaelstyle\Exception('Class Memcached not found!');
+    }
     $elms = explode(',',$uri);
     $hosts = array();
     foreach($elms as $elm){
@@ -47,11 +50,18 @@ class Memcache implements \mychaelstyle\datastore\Provider {
     }
     $prefix = isset($options['prefix'])?$options['prefix']:'ms_datastore_';
     $this->expire = isset($options['expire'])?$options['expire']:(60*60*24*7);
-    $this->memcached = new Memcached();
+    $this->memcached = new \Memcached();
     $this->memcached->addServers($hosts);
     $this->memcached->setOption(Memcached::OPT_DISTRIBUTION, Memcached::DISTRIBUTION_CONSISTENT);
     $this->memcached->setOption(Memcached::DISTRIBUTION_CONSISTENT, true);
     $this->memcached->setOption(Memcached::OPT_PREFIX_KEY, $prefix);
+  }
+  /**
+   * disconnect
+   */
+  public function disconnect(){
+    $this->memcached = null;
+    $this->expire = 604800;
   }
   /**
    * batch write datas

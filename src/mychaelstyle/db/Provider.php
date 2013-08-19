@@ -10,7 +10,6 @@
  * @subpackage db
  * @auther Masanori Nakashima
  */
-
 namespace mychaelstyle\db;
 require_once dirname(dirname(__FILE__)).'/Provider.php';
 

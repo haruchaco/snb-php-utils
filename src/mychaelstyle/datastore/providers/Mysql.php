@@ -67,7 +67,7 @@ class Mysql extends \mychaelstyle\ProviderMysql implements \mychaelstyle\datasto
 	 */
 	public function connect($uri,$options=array()){
     parent::connect($uri,$options);
-    $this->table = $this->options['table'];
+    $this->table = isset($this->options['table']) ? $this->options['table'] : null;
     $this->field_uri = isset($this->options['uri']) ? $this->options['uri']: 'uri';
     $this->field_contents = isset($this->options['contents']) ? $this->options['contents']: 'contents';
   }
@@ -99,6 +99,8 @@ class Mysql extends \mychaelstyle\ProviderMysql implements \mychaelstyle\datasto
           $fields[] = $f;
           $holders[] = ':'.$f;
         }
+        $removeCond = array($keys[0] => $row[$keys[0]]);
+        $this->remove($table,$removeCond);
         $sql = sprintf('INSERT INTO %s (%s)VALUES(%s)',$table,
           implode(',',$fields),implode(',',$holders));
         try {
@@ -109,11 +111,14 @@ class Mysql extends \mychaelstyle\ProviderMysql implements \mychaelstyle\datasto
           $statement->execute();
           $statement->closeCursor();
         } catch(\Exception $e){
-          throw new \mychaelstyle\Exception('Data provider mysql: fail to insert!',0,$e);
+          throw new \mychaelstyle\Exception('Data provider mysql: fail to insert! '.$e->getMessage(),0,$e);
         }
       }
     }
   }
+  /**
+   * batch get
+   */
   public function batchGet(array $keys){
     $pdo = $this->getConnection();
     $retMap = array();
@@ -131,7 +136,10 @@ class Mysql extends \mychaelstyle\ProviderMysql implements \mychaelstyle\datasto
             $statement->bindValue(':'.$f,$v,$this->paramType($v));
           }
           $statement->execute();
-		      $retMap[$table][] = $statement->fetch(\PDO::FETCH_ASSOC);
+          $result = $statement->fetch(\PDO::FETCH_ASSOC);
+          if($result){
+		        $retMap[$table][] = $result;
+          }
           $statement->closeCursor();
         } catch(\Exception $e){
           throw new \mychaelstyle\Exception('Data provider mysql: fail to select!',0,$e);
@@ -182,7 +190,7 @@ class Mysql extends \mychaelstyle\ProviderMysql implements \mychaelstyle\datasto
       )
     );
     $result = $this->batchGet($keys);
-    return (isset($result[$table]) && isset($result[$table][0])) ? $result[$table][0] : null;
+    return (isset($result[$table]) && isset($result[$table][0]) && is_array($result[$table][0])) ? $result[$table][0] : null;
   }
   /**
    * remove

@@ -1,23 +1,16 @@
 <?php
-require_once(dirname(dirname(__FILE__))
-.DIRECTORY_SEPARATOR.'system'
-.DIRECTORY_SEPARATOR.'Data.class.php');
 /**
  * データアクセスオブジェクトの基底抽象クラス
- *
- * テーブルレコードに対応したデータアクセスオブジェクトクラスの基底クラスです。
- * 本クラスの拡張クラスとしてデータアクセスオブジェクトクラスを実装することで
- * 様々な機能を提供します。
- * 本オブジェクトの実装で扱うクラスは必ずひとつの自動番号フィールドと
- * ひとつ以上のユニークフィールドを保持する必要があります。
- * 
- * @package db
- * @copyright Copyright (c) 2011, framework-fpider Developer Team.
- * @link http://sourceforge.jp/projects/frameworkspider/
- * @author  Masanori Nakashima <m_nakashima@users.sourceforge.jp>
- * @see system_Data
+ * @package mychaelstyle
+ * @subpackage db
  */
-abstract class db_Data extends system_Data {
+namespace mychaelstyle\db;
+/**
+ * データアクセスオブジェクトの基底抽象クラス
+ * @package mychaelstyle
+ * @subpackage db
+ */
+abstract class Record {
 	/**
 	 * constructor
 	 * @return unknown_type
@@ -77,15 +70,6 @@ abstract class db_Data extends system_Data {
   public function getExcludedFields(){
     return array('updated_at','updated_date');
   }
-	//
-	// Dataの実装
-	//
-	/**
-	 * データ保存区分名を取得する
-	 */
-	public function getDataClassName(){
-		return $this->getTableName();
-	}
   /**
    * 検索の場合にレコードを一意に特定するテーブルのユニークキーフィールド名配列を返します。
    * 組み合わせの場合は配列で返します。

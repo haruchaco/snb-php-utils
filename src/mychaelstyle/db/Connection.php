@@ -2,7 +2,12 @@
 /**
  * @package mychaelstyle
  * @subpackage db
- * @author  Masanori Nakashima <m_nakashima@users.sourceforge.jp>
+ */
+namespace mychaelstyle\db;
+
+/**
+ * @package mychaelstyle
+ * @subpackage db
  */
 class Connection {
   /** in transaction  */
