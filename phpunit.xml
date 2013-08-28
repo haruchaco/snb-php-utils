@@ -2,4 +2,7 @@
 <phpunit
   colors="true"
   bootstrap="tests/bootstrap.php">
+  <testsuite name="Test suite">
+    <directory>./tests</directory>
+  </testsuite>
 </phpunit>
