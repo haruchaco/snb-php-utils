@@ -97,7 +97,18 @@ class AmazonDynamoDB extends \mychaelstyle\ProviderAws implements \mychaelstyle\
             $item[$f] = $val;
           }
         }
-        $items[] = $item;
+        $kfm = $keys[$table];
+        $kfs = array_keys($kfm);
+        $sorted = array();
+        foreach($kfs as $f){
+          $sorted[$f] = $item[$f];
+        }
+        foreach($item as $f => $v){
+          if(!in_array($f,$kfs)){
+            $sorted[$f] = $v;
+          }
+        }
+        $items[] = $sorted;
       }
       $retMap[$table] = $items;
     }
