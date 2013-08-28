@@ -36,8 +36,8 @@ class AmazonSQSTest extends \PHPUnit_Framework_TestCase
     $this->dsn = 'AmazonSQS://REGION_'.$_SERVER['AWS_REGION_NAME'].'/tests';
     $this->uri = $_SERVER['AWS_REGION_NAME'].'/tests';
     $this->options = array(
-      'key' => $_SERVER['AWS_KEY'],
-      'secret' => $_SERVER['AWS_SECRET'],
+      'key' => $_SERVER['AWS_ACCESS_KEY'],
+      'secret' => $_SERVER['AWS_SECRET_KEY'],
       'default_cache_config' => '',
       'certificate_autority' => false
     );

@@ -36,8 +36,8 @@ class AmazonDynamoDBTest extends \mychaelstyle\TestBase
     $this->dsn = 'AmazonDynamoDB://REGION_'.$_SERVER['AWS_REGION_NAME'].'/tests';
     $this->uri = $_SERVER['AWS_REGION_NAME'].'/tests';
     $this->options = array(
-      'key' => $_SERVER['AWS_KEY'],
-      'secret' => $_SERVER['AWS_SECRET'],
+      'key' => $_SERVER['AWS_ACCESS_KEY'],
+      'secret' => $_SERVER['AWS_SECRET_KEY'],
       'default_cache_config' => '',
       'certificate_autority' => false
     );
@@ -80,12 +80,12 @@ class AmazonDynamoDBTest extends \mychaelstyle\TestBase
     $this->object->write('tests',$expected['tests'][0]);
 
     // get
-    $result = $this->object->get('tests',array('id'=>'AAAA0001','updated_at'=>$t));
+    $result = $this->object->get('tests',array('id'=>'AAAA0001'));
     $this->assertEquals($expected['tests'][0],$result);
 
     // remove
-    $this->object->remove('tests',array('id'=>'AAAA0001','updated_at'=>$t));
-    $result = $this->object->get('tests',array('id'=>'AAAA0001','updated_at'=>$t));
+    $this->object->remove('tests',array('id'=>'AAAA0001'));
+    $result = $this->object->get('tests',array('id'=>'AAAA0001'));
     $this->assertNull($result);
 
     // batch write
@@ -95,7 +95,7 @@ class AmazonDynamoDBTest extends \mychaelstyle\TestBase
     $result = $this->object->batchGet(
       array(
         'tests'=>array(
-          array('id'=>'AAAA0001','updated_at'=>$t)
+          array('id'=>'AAAA0001')
         )
       )
     );
@@ -105,11 +105,11 @@ class AmazonDynamoDBTest extends \mychaelstyle\TestBase
     $result = $this->object->batchRemove(
       array(
         'tests'=>array(
-          array('id'=>'AAAA0001','updated_at'=>$t)
+          array('id'=>'AAAA0001')
         )
       )
     );
-    $result = $this->object->get('tests',array('id'=>'AAAA0001','updated_at'=>$t));
+    $result = $this->object->get('tests',array('id'=>'AAAA0001'));
     $this->assertNull($result);
   }
 }

@@ -8,12 +8,12 @@ require_once 'storage/providers/AmazonS3.php';
  * add the following env variables to your environment.
  *
  * <pre>
- * AWS_KEY=[your aws key]
- * AWS_SECRET=[your aws secret]
+ * AWS_ACCESS_KEY=[your aws key]
+ * AWS_SECRET_KEY=[your aws secret]
  * AWS_S3_BUCKET="your bucket name"
  * AWS_REGION_NAME="TOKYO"
  * AWS_REGION_HOST="s3-ap-northeast-1.amazonaws.com"
- * export AWS_KEY AWS_SECRET AWS_S3_BUCKET SNB_AWS_REGION_NAME SNB_AWS_S3_REGION_HOST
+ * export AWS_ACCESS_KEY AWS_SECRET_KEY AWS_S3_BUCKET SNB_AWS_REGION_NAME SNB_AWS_S3_REGION_HOST
  * </pre>
  */
 class AmazonS3Test extends \mychaelstyle\TestBase
@@ -52,8 +52,8 @@ class AmazonS3Test extends \mychaelstyle\TestBase
     $this->dsn = $_SERVER['AWS_REGION_NAME'].'/'.$_SERVER['AWS_S3_BUCKET'];
     // set your aws key and secret to your env
     $this->options = array(
-      'key' => $_SERVER['AWS_KEY'],
-      'secret' => $_SERVER['AWS_SECRET'],
+      'key' => $_SERVER['AWS_ACCESS_KEY'],
+      'secret' => $_SERVER['AWS_SECRET_KEY'],
       'default_cache_config' => '',
       'certificate_autority' => false
     );
